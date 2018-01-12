@@ -11,43 +11,44 @@ import Html.Events exposing (onClick)
 
 type BlockChain = Blockchain (List Block)
 
-type alias Miner =
-  { blockToErase : Maybe Block }
+type alias Miner = { blockToErase : Maybe Block }
 
-type alias Block =
-  { transaction : Transaction
-  , chain : BlockChain
-  , nonce : String
-  }
+type alias Block = {
+  transaction : Transaction,
+  chain : BlockChain,
+  nonce : String
+}
 
-type alias Transaction =
-  { sender : Address
-  , recipient : Address
-  , amount : Int
-  }
+type alias Transaction = {
+  sender : Address,
+  recipient : Address,
+  amount : Int
+}
 
-type alias Address =
-  { hash : String }
+type alias Address = {
+  hash : String
+}
 
-type alias Model =
-    { miners : List Miner
-    , originBlock : Maybe Block
-    , transactionPool : List Transaction
-    , fillerAddresses : List Address
-    , mainAddresses : List Address
-    }
+type alias Model = {
+  miners : List Miner,
+  originBlock : Maybe Block,
+  transactionPool : List Transaction,
+  fillerAddresses : List Address,
+  mainAddresses : List Address
+}
 
 init : ( Model, Cmd Msg )
 init =
-    (
-      { miners = []
-      , originBlock = Nothing
-      , transactionPool = []
-      , fillerAddresses = []
-      , mainAddresses = []
-      }
-      , Cmd.none
-    )
+  (
+    {
+      miners = [],
+      originBlock = Nothing,
+      transactionPool = [],
+      fillerAddresses = [],
+      mainAddresses = []
+    },
+    Cmd.none
+  )
 
 
 
@@ -59,12 +60,13 @@ type Msg = Next
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    (
+  (
     case msg of
       Next ->
         model
-    , Cmd.none
-    )
+    ,
+    Cmd.none
+  )
 
 
 
@@ -72,13 +74,13 @@ update msg model =
 
 
 view : Model -> Html Msg
-view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
-        , div [] [ text ("# Miners: " ++ toString (List.length (.miners model))) ]
-        , button [ onClick Next ] [ text "Next" ]
-        ]
+view model = div []
+  [
+    img [ src "/logo.svg" ] [],
+    h1 [] [ text "Your Elm App is working!" ],
+    div [] [ text ("# Miners: " ++ toString (List.length (.miners model))) ],
+    button [ onClick Next ] [ text "Next" ]
+  ]
 
 
 
@@ -86,10 +88,10 @@ view model =
 
 
 main : Program Never Model Msg
-main =
-    Html.program
-        { view = view
-        , init = init
-        , update = update
-        , subscriptions = always Sub.none
-        }
+main = Html.program
+  {
+    view = view,
+    init = init,
+    update = update,
+    subscriptions = always Sub.none
+  }

@@ -1,32 +1,70 @@
 module Main exposing (..)
 
-import Html exposing (Html, text, div, h1, img)
+import Html exposing (Html, button, text, div, h1, img)
 import Html.Attributes exposing (src)
+import Html.Events exposing (onClick)
+
 
 
 ---- MODEL ----
 
 
-type alias Model =
-    {}
+type BlockChain = Blockchain (List Block)
 
+type alias Miner =
+  { blockToErase : Maybe Block }
+
+type alias Block =
+  { transaction : Transaction
+  , chain : BlockChain
+  , nonce : String
+  }
+
+type alias Transaction =
+  { sender : Address
+  , recipient : Address
+  , amount : Int
+  }
+
+type alias Address =
+  { hash : String }
+
+type alias Model =
+    { miners : List Miner
+    , originBlock : Maybe Block
+    , transactionPool : List Transaction
+    , fillerAddresses : List Address
+    , mainAddresses : List Address
+    }
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    (
+      { miners = []
+      , originBlock = Nothing
+      , transactionPool = []
+      , fillerAddresses = []
+      , mainAddresses = []
+      }
+      , Cmd.none
+    )
 
 
 
 ---- UPDATE ----
 
 
-type Msg
-    = NoOp
+type Msg = Next
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    (
+    case msg of
+      Next ->
+        model
+    , Cmd.none
+    )
 
 
 
@@ -38,6 +76,8 @@ view model =
     div []
         [ img [ src "/logo.svg" ] []
         , h1 [] [ text "Your Elm App is working!" ]
+        , div [] [ text ("# Miners: " ++ toString (List.length (.miners model))) ]
+        , button [ onClick Next ] [ text "Next" ]
         ]
 
 

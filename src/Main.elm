@@ -3,6 +3,7 @@ module Main exposing (..)
 import Html exposing (Html, button, text, div, h1, h2, br)
 -- import Html.Attributes exposing (src)
 import Html.Events exposing (onClick)
+import Sha256 exposing (sha256)
 
 
 
@@ -38,10 +39,10 @@ type alias Model = {
 }
 
 txHash : Transaction -> String
-txHash tx = "asdf"
+txHash tx = sha256 (toString (.amount tx) ++ .hash (.sender tx) ++ .hash (.recipient tx))
 
-blockHash : Transaction -> String
-blockHash block = "asdf"
+blockHash : Block -> String
+blockHash block = sha256 (txHash (.transaction block) ++ .nonce block) -- needs more input to hash
 
 minerDisplay : Miner -> String
 minerDisplay miner =
@@ -49,7 +50,7 @@ minerDisplay miner =
     Nothing ->
       "just chillin"
     Just block ->
-      "mwahaha"
+      "Trying to erase block: " ++ blockHash block
 
 init : ( Model, Cmd Msg )
 init =

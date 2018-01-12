@@ -40,6 +40,17 @@ type alias Model = {
 txHash : Transaction -> String
 txHash tx = "asdf"
 
+blockHash : Transaction -> String
+blockHash block = "asdf"
+
+minerDisplay : Miner -> String
+minerDisplay miner =
+  case (.blockToErase miner) of
+    Nothing ->
+      "just chillin"
+    Just block ->
+      "mwahaha"
+
 init : ( Model, Cmd Msg )
 init =
   (
@@ -90,7 +101,7 @@ view model = div []
     h2 [] [ text "Miners" ],
     .miners model
       |> List.concatMap ( \miner -> [
-          text (toString miner),
+          text ("• " ++ minerDisplay miner),
           br [] []
         ] )
       |> div []

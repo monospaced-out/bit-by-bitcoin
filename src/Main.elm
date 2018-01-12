@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (Html, button, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Html exposing (Html, button, text, div, h1, h2, br)
+-- import Html.Attributes exposing (src)
 import Html.Events exposing (onClick)
 
 
@@ -37,11 +37,20 @@ type alias Model = {
   mainAddresses : List Address
 }
 
+txHash : Transaction -> String
+txHash tx = "asdf"
+
 init : ( Model, Cmd Msg )
 init =
   (
     {
-      miners = [],
+      miners = [
+        { blockToErase = Nothing },
+        { blockToErase = Nothing },
+        { blockToErase = Nothing },
+        { blockToErase = Nothing },
+        { blockToErase = Nothing }
+      ],
       originBlock = Nothing,
       transactionPool = [],
       fillerAddresses = [],
@@ -76,10 +85,15 @@ update msg model =
 view : Model -> Html Msg
 view model = div []
   [
-    img [ src "/logo.svg" ] [],
-    h1 [] [ text "Your Elm App is working!" ],
-    div [] [ text ("# Miners: " ++ toString (List.length (.miners model))) ],
-    button [ onClick Next ] [ text "Next" ]
+    h1 [] [ text "bit by bitcoin" ],
+    button [ onClick Next ] [ text "Next" ],
+    h2 [] [ text "Miners" ],
+    .miners model
+      |> List.concatMap ( \miner -> [
+          text (toString miner),
+          br [] []
+        ] )
+      |> div []
   ]
 
 

@@ -72,8 +72,8 @@ minerActionDisplay model minerIndex =
     Nothing ->
       ""
     Just transaction ->
-      ": " ++ ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++
-        testBlockHash transaction model.originBlock minerIndex model.randomValue
+      ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++ ": " ++
+        String.slice 0 10 (testBlockHash transaction model.originBlock minerIndex model.randomValue) ++ "..."
 
 newMiner : Maybe Block -> Miner
 newMiner block = { blockToErase = block }

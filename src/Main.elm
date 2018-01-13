@@ -80,16 +80,16 @@ init =
       ],
       blockChainOrigin = BlockChain [],
       transactionPool = [
-        newTx 01 02 1,
         newTx 11 12 1,
+        newTx 13 14 1,
+        newTx 15 16 1,
+        newTx 17 18 1,
+        newTx 19 20 1,
         newTx 21 22 1,
-        newTx 31 32 1,
-        newTx 41 42 1,
-        newTx 51 52 1,
-        newTx 61 62 1,
-        newTx 71 72 1,
-        newTx 81 82 1,
-        newTx 91 92 1
+        newTx 23 24 1,
+        newTx 25 26 1,
+        newTx 27 28 1,
+        newTx 29 30 1
       ],
       mainAddresses = [
         newAddress 1,

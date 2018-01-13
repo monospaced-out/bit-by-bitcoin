@@ -76,6 +76,9 @@ newTx senderSeed recipientSeed amount =
     amount = amount
   }
 
+tryNonce : Transaction -> BlockLink -> String -> String
+tryNonce tx previousBlock nonce = sha256 (txHash tx ++ blockLinkHash previousBlock ++ nonce)
+
 init : ( Model, Cmd Msg )
 init =
   (
@@ -139,10 +142,17 @@ view model = div []
     button [ onClick Next ] [ text "Next" ],
     h2 [] [ text "Miners" ],
     model.miners
-      |> List.concatMap ( \miner -> [
-          text ("• " ++ minerDisplay miner),
+      |> List.indexedMap ( \m miner -> [
+          text ("• " ++ minerDisplay miner ++ ". trying nonce " ++ (toString (m + model.randomValue))),
+          case List.head model.transactionPool of
+            Nothing ->
+              text ""
+            Just transaction ->
+              text (": " ++ (tryNonce transaction model.originBlock (toString (m + model.randomValue))))
+          ,
           br [] []
         ] )
+      |> List.concat
       |> div [],
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool

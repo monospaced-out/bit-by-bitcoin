@@ -38,14 +38,14 @@ type alias Model = {
 }
 
 txHash : Transaction -> String
-txHash tx = sha256 (toString (.amount tx) ++ .hash (.sender tx) ++ .hash (.recipient tx))
+txHash tx = sha256 (toString tx.amount ++ tx.sender.hash ++ tx.recipient.hash)
 
 blockHash : Block -> String
-blockHash block = sha256 (txHash (.transaction block) ++ .nonce block) -- needs more input to hash
+blockHash block = sha256 (txHash block.transaction ++ block.nonce) -- needs more input to hash
 
 minerDisplay : Miner -> String
 minerDisplay miner =
-  case (.blockToErase miner) of
+  case miner.blockToErase of
     Nothing ->
       "just chillin"
     Just block ->
@@ -129,14 +129,14 @@ view model = div []
     h1 [] [ text "bit by bitcoin" ],
     button [ onClick Next ] [ text "Next" ],
     h2 [] [ text "Miners" ],
-    .miners model
+    model.miners
       |> List.concatMap ( \miner -> [
           text ("• " ++ minerDisplay miner),
           br [] []
         ] )
       |> div [],
     h2 [] [ text "Transaction Pool" ],
-    .transactionPool model
+    model.transactionPool
       |> List.concatMap ( \tx -> [
           text ("• " ++ txHash tx),
           br [] []

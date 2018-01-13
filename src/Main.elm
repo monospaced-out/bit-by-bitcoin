@@ -4,7 +4,6 @@ import Html exposing (Html, button, text, div, h1, h2, br)
 -- import Html.Attributes exposing (src)
 import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
-import Time exposing (now)
 
 
 
@@ -52,45 +51,50 @@ minerDisplay miner =
     Just block ->
       "Trying to erase block: " ++ blockHash block
 
-newMiner : Miner
-newMiner = { blockToErase = Nothing }
+newMiner : Maybe Block -> Miner
+newMiner block = { blockToErase = block }
 
-newAddress : Address
-newAddress = { hash = sha256 (toString Time.now) }
+newAddress : Int -> Address
+newAddress seed = { hash = sha256 (toString seed) }
 
-newTransaction : Transaction
-newTransaction = { sender = newAddress, recipient = newAddress, amount = 1 }
+newTx : Int -> Int -> Int -> Transaction
+newTx senderSeed recipientSeed amount =
+  {
+    sender = newAddress senderSeed,
+    recipient = newAddress recipientSeed,
+    amount = amount
+  }
 
 init : ( Model, Cmd Msg )
 init =
   (
     {
       miners = [
-        newMiner,
-        newMiner,
-        newMiner,
-        newMiner,
-        newMiner
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing
       ],
       blockChainOrigin = BlockChain [],
       transactionPool = [
-        newTransaction,
-        newTransaction,
-        newTransaction,
-        newTransaction,
-        newTransaction,
-        newTransaction,
-        newTransaction,
-        newTransaction,
-        newTransaction,
-        newTransaction
+        newTx 01 02 1,
+        newTx 11 12 1,
+        newTx 21 22 1,
+        newTx 31 32 1,
+        newTx 41 42 1,
+        newTx 51 52 1,
+        newTx 61 62 1,
+        newTx 71 72 1,
+        newTx 81 82 1,
+        newTx 91 92 1
       ],
       mainAddresses = [
-        newAddress,
-        newAddress,
-        newAddress,
-        newAddress,
-        newAddress
+        newAddress 1,
+        newAddress 2,
+        newAddress 3,
+        newAddress 4,
+        newAddress 5
       ]
     },
     Cmd.none
@@ -128,6 +132,13 @@ view model = div []
     .miners model
       |> List.concatMap ( \miner -> [
           text ("• " ++ minerDisplay miner),
+          br [] []
+        ] )
+      |> div [],
+    h2 [] [ text "Transaction Pool" ],
+    .transactionPool model
+      |> List.concatMap ( \tx -> [
+          text ("• " ++ txHash tx),
           br [] []
         ] )
       |> div []

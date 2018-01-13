@@ -11,7 +11,7 @@ import Time exposing (now)
 ---- MODEL ----
 
 
-type BlockChain = Blockchain (List Block)
+type BlockChain = BlockChain (List Block)
 
 type alias Miner = { blockToErase : Maybe Block }
 
@@ -33,7 +33,7 @@ type alias Address = {
 
 type alias Model = {
   miners : List Miner,
-  originBlock : Maybe Block,
+  blockChainOrigin : BlockChain,
   transactionPool : List Transaction,
   mainAddresses : List Address
 }
@@ -72,7 +72,7 @@ init =
         newMiner,
         newMiner
       ],
-      originBlock = Nothing,
+      blockChainOrigin = BlockChain [],
       transactionPool = [
         newTransaction,
         newTransaction,
@@ -85,7 +85,13 @@ init =
         newTransaction,
         newTransaction
       ],
-      mainAddresses = []
+      mainAddresses = [
+        newAddress,
+        newAddress,
+        newAddress,
+        newAddress,
+        newAddress
+      ]
     },
     Cmd.none
   )

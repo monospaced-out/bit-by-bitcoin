@@ -11,13 +11,13 @@ import Random exposing (generate, int)
 ---- MODEL ----
 
 
-type BlockChain = BlockChain (List Block)
-
 type alias Miner = { blockToErase : Maybe Block }
+
+type BlockLink = BlockLink Block | OriginBlock
 
 type alias Block = {
   transaction : Transaction,
-  chain : BlockChain,
+  previousBlock : BlockLink,
   nonce : String
 }
 
@@ -33,7 +33,7 @@ type alias Address = {
 
 type alias Model = {
   miners : List Miner,
-  blockChainOrigin : BlockChain,
+  originBlock : BlockLink,
   transactionPool : List Transaction,
   mainAddresses : List Address,
   randomValue : Int
@@ -78,7 +78,7 @@ init =
         newMiner Nothing,
         newMiner Nothing
       ],
-      blockChainOrigin = BlockChain [],
+      originBlock = OriginBlock,
       transactionPool = [
         newTx 11 12 1,
         newTx 13 14 1,

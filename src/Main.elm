@@ -43,7 +43,16 @@ txHash : Transaction -> String
 txHash tx = sha256 (toString tx.amount ++ tx.sender.hash ++ tx.recipient.hash)
 
 blockHash : Block -> String
-blockHash block = sha256 (txHash block.transaction ++ block.nonce) -- needs more input to hash
+blockHash block =
+  sha256 (txHash block.transaction ++ blockLinkHash block.previousBlock ++ block.nonce)
+
+blockLinkHash : BlockLink -> String
+blockLinkHash blocklink =
+  case blocklink of
+    OriginBlock ->
+      sha256 "0"
+    BlockLink block ->
+      blockHash block
 
 minerDisplay : Miner -> String
 minerDisplay miner =

@@ -5,6 +5,7 @@ import Html exposing (Html, button, text, div, h1, h2, br)
 import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random exposing (generate, int)
+import String exposing (slice)
 
 
 
@@ -61,9 +62,18 @@ minerDisplay : Miner -> String
 minerDisplay miner =
   case miner.blockToErase of
     Nothing ->
-      "just chillin"
+      "• " ++ "just chillin"
     Just block ->
-      "Trying to erase block: " ++ blockHash block
+      "• " ++ "Trying to erase block: " ++ blockHash block
+
+minerActionDisplay : Model -> Int -> String
+minerActionDisplay model minerIndex =
+  case List.head model.transactionPool of
+    Nothing ->
+      ""
+    Just transaction ->
+      ": " ++ ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++
+        testBlockHash transaction model.originBlock minerIndex model.randomValue
 
 newMiner : Maybe Block -> Miner
 newMiner block = { blockToErase = block }
@@ -79,9 +89,15 @@ newTx senderSeed recipientSeed amount =
     amount = amount
   }
 
-tryNonce : Transaction -> BlockLink -> String -> String
-tryNonce tx previousBlock nonce =
- txHash tx ++ blockLinkHash previousBlock ++ nonce
+chooseNonce : Int -> Int -> String
+chooseNonce minerIndex seed = minerIndex + seed
+  |> toString
+  |> sha256
+  |> String.slice 0 5
+
+testBlockHash : Transaction -> BlockLink -> Int -> Int -> String
+testBlockHash tx previousBlock minerIndex seed =
+ txHash tx ++ blockLinkHash previousBlock ++ chooseNonce minerIndex seed
  |> sha256
 
 init : ( Model, Cmd Msg )
@@ -148,13 +164,8 @@ view model = div []
     h2 [] [ text "Miners" ],
     model.miners
       |> List.indexedMap ( \m miner -> [
-          text ("• " ++ minerDisplay miner ++ ". trying nonce " ++ (toString (m + model.randomValue))),
-          case List.head model.transactionPool of
-            Nothing ->
-              text ""
-            Just transaction ->
-              text (": " ++ (tryNonce transaction model.originBlock (toString (m + model.randomValue))))
-          ,
+          minerDisplay miner |> text,
+          minerActionDisplay model m |> text,
           br [] []
         ] )
       |> List.concat

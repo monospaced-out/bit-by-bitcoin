@@ -4,6 +4,7 @@ import Html exposing (Html, button, text, div, h1, h2, br)
 -- import Html.Attributes exposing (src)
 import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
+import Time exposing (now)
 
 
 
@@ -34,7 +35,6 @@ type alias Model = {
   miners : List Miner,
   originBlock : Maybe Block,
   transactionPool : List Transaction,
-  fillerAddresses : List Address,
   mainAddresses : List Address
 }
 
@@ -52,20 +52,39 @@ minerDisplay miner =
     Just block ->
       "Trying to erase block: " ++ blockHash block
 
+newMiner : Miner
+newMiner = { blockToErase = Nothing }
+
+newAddress : Address
+newAddress = { hash = sha256 (toString Time.now) }
+
+newTransaction : Transaction
+newTransaction = { sender = newAddress, recipient = newAddress, amount = 1 }
+
 init : ( Model, Cmd Msg )
 init =
   (
     {
       miners = [
-        { blockToErase = Nothing },
-        { blockToErase = Nothing },
-        { blockToErase = Nothing },
-        { blockToErase = Nothing },
-        { blockToErase = Nothing }
+        newMiner,
+        newMiner,
+        newMiner,
+        newMiner,
+        newMiner
       ],
       originBlock = Nothing,
-      transactionPool = [],
-      fillerAddresses = [],
+      transactionPool = [
+        newTransaction,
+        newTransaction,
+        newTransaction,
+        newTransaction,
+        newTransaction,
+        newTransaction,
+        newTransaction,
+        newTransaction,
+        newTransaction,
+        newTransaction
+      ],
       mainAddresses = []
     },
     Cmd.none

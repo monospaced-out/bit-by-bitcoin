@@ -4,6 +4,7 @@ import Html exposing (Html, button, text, div, h1, h2, br)
 -- import Html.Attributes exposing (src)
 import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
+import Random exposing (generate, int)
 
 
 
@@ -34,7 +35,8 @@ type alias Model = {
   miners : List Miner,
   blockChainOrigin : BlockChain,
   transactionPool : List Transaction,
-  mainAddresses : List Address
+  mainAddresses : List Address,
+  randomValue : Int
 }
 
 txHash : Transaction -> String
@@ -95,9 +97,10 @@ init =
         newAddress 3,
         newAddress 4,
         newAddress 5
-      ]
+      ],
+      randomValue = 0
     },
-    Cmd.none
+    Random.generate RandomEvent (Random.int 1 100000)
   )
 
 
@@ -105,19 +108,16 @@ init =
 ---- UPDATE ----
 
 
-type Msg = Next
+type Msg = Next | RandomEvent Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  (
-    case msg of
-      Next ->
-        model
-    ,
-    Cmd.none
-  )
-
+  case msg of
+    Next ->
+      ( { model | randomValue = 1 }, Random.generate RandomEvent (Random.int 1 100000) )
+    RandomEvent randomValue ->
+      ({ model | randomValue = randomValue }, Cmd.none)
 
 
 ---- VIEW ----

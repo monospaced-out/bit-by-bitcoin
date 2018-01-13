@@ -40,11 +40,14 @@ type alias Model = {
 }
 
 txHash : Transaction -> String
-txHash tx = sha256 (toString tx.amount ++ tx.sender.hash ++ tx.recipient.hash)
+txHash tx =
+  toString tx.amount ++ tx.sender.hash ++ tx.recipient.hash
+  |> sha256
 
 blockHash : Block -> String
 blockHash block =
-  sha256 (txHash block.transaction ++ blockLinkHash block.previousBlock ++ block.nonce)
+  txHash block.transaction ++ blockLinkHash block.previousBlock ++ block.nonce
+  |> sha256
 
 blockLinkHash : BlockLink -> String
 blockLinkHash blocklink =
@@ -77,7 +80,9 @@ newTx senderSeed recipientSeed amount =
   }
 
 tryNonce : Transaction -> BlockLink -> String -> String
-tryNonce tx previousBlock nonce = sha256 (txHash tx ++ blockLinkHash previousBlock ++ nonce)
+tryNonce tx previousBlock nonce =
+ txHash tx ++ blockLinkHash previousBlock ++ nonce
+ |> sha256
 
 init : ( Model, Cmd Msg )
 init =

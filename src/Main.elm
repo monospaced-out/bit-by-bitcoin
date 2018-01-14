@@ -30,7 +30,7 @@ type alias Block = {
 
 type alias Transaction = {
   sender : Address,
-  recipient : Address,
+  receiver : Address,
   amount : Int
 }
 
@@ -50,13 +50,13 @@ type alias Model = {
 
 type alias TxForm = {
   sender : String,
-  recipient : String,
+  receiver : String,
   amount : Int
 }
 
 txHash : Transaction -> String
 txHash tx =
-  toString tx.amount ++ tx.sender.hash ++ tx.recipient.hash
+  toString tx.amount ++ tx.sender.hash ++ tx.receiver.hash
   |> sha256
 
 blockHash : Block -> String
@@ -105,7 +105,7 @@ blockDisplay blocklink =
 txDisplay : Transaction -> String
 txDisplay tx =
   "• " ++ hashDisplay (txHash tx) ++ " {from: " ++ hashDisplay tx.sender.hash ++
-    ", to: " ++ hashDisplay tx.recipient.hash ++ ", amount: " ++
+    ", to: " ++ hashDisplay tx.receiver.hash ++ ", amount: " ++
     toString tx.amount ++ "BTC}"
 
 hashDisplay : String -> String
@@ -118,10 +118,10 @@ newAddress : Int -> Int -> Address
 newAddress seed balance = { hash = sha256 (toString seed), balance = balance }
 
 newTx : Int -> Int -> Int -> Transaction
-newTx senderSeed recipientSeed amount =
+newTx senderSeed receiverSeed amount =
   {
     sender = newAddress senderSeed 10,
-    recipient = newAddress recipientSeed 10,
+    receiver = newAddress receiverSeed 10,
     amount = amount
   }
 
@@ -150,7 +150,7 @@ init =
       randomValue = 0,
       txForm = {
         sender = "",
-        recipient = "",
+        receiver = "",
         amount = 0
       }
     },
@@ -162,7 +162,7 @@ init =
 ---- UPDATE ----
 
 
-type Msg = Next | PostTx | InputTxSender String | InputTxRecipient String | InputTxAmount String | RandomEvent Int
+type Msg = Next | PostTx | InputTxSender String | InputTxReceiver String | InputTxAmount String | RandomEvent Int
 
 mine : Model -> Model
 mine model =
@@ -184,11 +184,11 @@ mine model =
               )
               |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
             newTxSender = length model.addressBook
-            newTxRecipient = length model.addressBook + 1
+            newTxReceiver = length model.addressBook + 1
             newTxAmount = 1
             newAddressBalance = 10
             removeMinedTx = (drop 1 model.transactionPool)
-            replacementTx = newTx newTxSender newTxRecipient newTxAmount
+            replacementTx = newTx newTxSender newTxReceiver newTxAmount
           in
             case head results of
               Nothing ->
@@ -204,7 +204,7 @@ mine model =
                   transactionPool = append removeMinedTx [replacementTx],
                   addressBook = append model.addressBook [
                     (newAddress newTxSender newAddressBalance),
-                    (newAddress newTxRecipient newAddressBalance)
+                    (newAddress newTxReceiver newAddressBalance)
                   ]
                 }
 
@@ -216,11 +216,11 @@ inputTxSender model value =
   in
     { model | txForm = newForm }
 
-inputTxRecipient : Model -> String -> Model
-inputTxRecipient model value =
+inputTxReceiver : Model -> String -> Model
+inputTxReceiver model value =
   let
     oldForm = model.txForm
-    newForm = { oldForm | recipient = value }
+    newForm = { oldForm | receiver = value }
   in
     { model | txForm = newForm }
 
@@ -242,8 +242,8 @@ update msg model =
       ( model , Cmd.none )
     InputTxSender value ->
       ( inputTxSender model value, Cmd.none )
-    InputTxRecipient value ->
-      ( inputTxRecipient model value, Cmd.none )
+    InputTxReceiver value ->
+      ( inputTxReceiver model value, Cmd.none )
     InputTxAmount value ->
       ( inputTxAmount model value, Cmd.none )
     RandomEvent randomValue ->
@@ -318,7 +318,7 @@ view model = div []
       ),
       br [] [],
       text("To: "),
-      select [ onChange InputTxRecipient ] (
+      select [ onChange InputTxReceiver ] (
         take numMainAddresses model.addressBook
           |> map ( \address ->
               option [ value address.hash ] [ text (hashDisplay address.hash) ]

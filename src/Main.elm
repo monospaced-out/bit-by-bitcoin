@@ -136,6 +136,18 @@ testBlockHash tx previousBlock minerIndex seed =
  txHash tx ++ blockLinkHash previousBlock ++ chooseNonce minerIndex seed
  |> sha256
 
+findAddress : String -> List Address -> Address
+findAddress hash addresses =
+  let
+    matches = addresses
+      |> filter (\a -> a.hash == hash)
+  in
+    case head matches of
+      Nothing ->
+        { hash = "", balance = 0 }
+      Just address ->
+        address
+
 init : ( Model, Cmd Msg )
 init =
   (
@@ -149,8 +161,8 @@ init =
         |> map (\i -> newAddress i 10),
       randomValue = 0,
       txForm = {
-        sender = "",
-        receiver = "",
+        sender = (newAddress 0 10).hash,
+        receiver = (newAddress 0 10).hash,
         amount = 0
       }
     },
@@ -232,6 +244,17 @@ inputTxAmount model value =
   in
     { model | txForm = newForm }
 
+postTx : Model -> Model
+postTx model =
+  let
+    newTransaction = {
+      sender = findAddress model.txForm.sender model.addressBook,
+      receiver = findAddress model.txForm.receiver model.addressBook,
+      amount = model.txForm.amount
+    }
+  in
+    { model | transactionPool = append model.transactionPool [newTransaction] }
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -239,7 +262,7 @@ update msg model =
     Next ->
       ( mine model, Random.generate RandomEvent (Random.int 1 100000) )
     PostTx ->
-      ( model , Cmd.none )
+      ( postTx model, Cmd.none )
     InputTxSender value ->
       ( inputTxSender model value, Cmd.none )
     InputTxReceiver value ->

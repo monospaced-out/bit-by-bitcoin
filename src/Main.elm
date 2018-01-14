@@ -6,7 +6,7 @@ import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice, toInt)
-import List exposing (head, concat, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length, sortWith, foldr)
+import List exposing (head, concat, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length, sortWith, foldr, tail)
 import Result exposing (withDefault)
 import Tuple exposing (second)
 import Json.Decode as Json
@@ -14,6 +14,7 @@ import Json.Decode as Json
 
 numMainAddresses = 5
 lastMainAddressIndex = numMainAddresses - 1
+confirmationsRequired = 6
 
 ---- MODEL ----
 
@@ -186,6 +187,39 @@ chainForBlock blocklink =
     BlockLink block ->
       BlockLink block :: chainForBlock block.previousBlock
 
+withUpdatedBalances : List BlockLink -> List Address -> List Address
+withUpdatedBalances blockchain addresses =
+  let
+    confirmedBlockchain = drop confirmationsRequired blockchain
+  in
+    addresses
+      |> map (\address -> { address | balance = balanceFor confirmedBlockchain address })
+
+balanceFor : List BlockLink -> Address -> Int
+balanceFor blockchain address =
+  case head blockchain of
+    Nothing ->
+      address.balance
+    Just blocklink ->
+      case blocklink of
+        OriginBlock ->
+          0
+        BlockLink block ->
+          let
+            difference =
+              if block.transaction.sender.hash == address.hash
+                then negate block.transaction.amount
+              else if block.transaction.receiver.hash == address.hash
+                then block.transaction.amount
+              else
+                0
+          in
+            case tail blockchain of
+              Nothing ->
+                0
+              Just remainingBlockchain ->
+                difference + balanceFor remainingBlockchain address
+
 
 init : ( Model, Cmd Msg )
 init =
@@ -259,8 +293,7 @@ mine model =
                     nonce = nonce,
                     hashCache = hash
                   } :: model.discoveredBlocks,
-                  transactionPool = newTransactionPool,
-                  addressBook = updateBalance withNewAddresses transaction
+                  transactionPool = newTransactionPool
                 }
 
 inputTxSender : Model -> String -> Model
@@ -355,7 +388,7 @@ view model = div []
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
       |> indexedMap ( \b blocklink -> [
-          if b == 6
+          if b == confirmationsRequired
             then h3 [] [ text "Confirmed" ]
           else if b == 0
             then h3 [] [ text "Unconfirmed" ]
@@ -375,6 +408,7 @@ view model = div []
       |> div [],
     h2 [] [ text "Joe Schmo's Neighborhood" ],
     take numMainAddresses model.addressBook
+      |> withUpdatedBalances (longestChain model.discoveredBlocks)
       |> concatMap ( \address -> [
           text ("• " ++ hashDisplay address.hash ++ " " ++ toString address.balance ++ " BTC"), -- fill in with computed BTC from blockchain
           br [] []

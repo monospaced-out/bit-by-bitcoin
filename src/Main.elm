@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (Html, button, text, div, h1, h2, br)
--- import Html.Attributes exposing (src)
+import Html exposing (Html, Attribute, button, text, div, h1, h2, br)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random exposing (generate, int)
@@ -109,6 +109,11 @@ init =
         newMiner Nothing,
         newMiner Nothing,
         newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
         newMiner Nothing
       ],
       originBlock = OriginBlock,
@@ -156,6 +161,16 @@ update msg model =
 ---- VIEW ----
 
 
+minerStyle : Model -> Int -> Attribute msg
+minerStyle model minerIndex =
+  case List.head model.transactionPool of
+    Nothing ->
+      style []
+    Just transaction ->
+      if (String.slice 0 2 (testBlockHash transaction model.originBlock minerIndex model.randomValue)) == "00"
+        then style [ ("backgroundColor", "green") , ("color", "white") ]
+        else style []
+
 view : Model -> Html Msg
 view model = div []
   [
@@ -163,12 +178,13 @@ view model = div []
     button [ onClick Next ] [ text "Next" ],
     h2 [] [ text "Miners" ],
     model.miners
-      |> List.indexedMap ( \m miner -> [
-          minerDisplay miner |> text,
-          minerActionDisplay model m |> text,
-          br [] []
-        ] )
-      |> List.concat
+      |> List.indexedMap ( \m miner ->
+          div [ minerStyle model m ] [
+            minerDisplay miner |> text,
+            minerActionDisplay model m |> text,
+            br [] []
+          ]
+        )
       |> div [],
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool

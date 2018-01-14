@@ -74,9 +74,9 @@ minerDisplay : Miner -> String
 minerDisplay miner =
   case miner.blockToErase of
     Nothing ->
-      "• " ++ "just chillin"
+      "just chillin"
     Just block ->
-      "• " ++ "Trying to erase block: " ++ blockHash block
+      "Trying to erase block: " ++ blockHash block
 
 minerActionDisplay : Model -> Int -> String
 minerActionDisplay model minerIndex =
@@ -93,18 +93,18 @@ minerActionDisplay model minerIndex =
 
 blockDisplay : BlockLink -> String
 blockDisplay blocklink =
-  "• " ++ hashDisplay (blockLinkHash blocklink) ++
+  hashDisplay (blockLinkHash blocklink) ++
   case blocklink of
     OriginBlock ->
       " (origin block)"
     BlockLink block ->
-      " {transaction: " ++ hashDisplay (txHash block.transaction) ++
+      " {transaction: " ++ txDisplay block.transaction ++
         ", nonce: " ++ block.nonce ++ ", previousBlock: " ++
         hashDisplay (blockLinkHash block.previousBlock) ++ "}"
 
 txDisplay : Transaction -> String
 txDisplay tx =
-  "• " ++ hashDisplay (txHash tx) ++ " {from: " ++ hashDisplay tx.sender.hash ++
+  hashDisplay (txHash tx) ++ " {from: " ++ hashDisplay tx.sender.hash ++
     ", to: " ++ hashDisplay tx.receiver.hash ++ ", amount: " ++
     toString tx.amount ++ "BTC}"
 
@@ -320,7 +320,7 @@ view model = div []
     model.miners
       |> indexedMap ( \m miner ->
           div [ minerStyle model m ] [
-            minerDisplay miner |> text,
+            "• " ++ minerDisplay miner |> text,
             minerActionDisplay model m |> text,
             br [] []
           ]
@@ -329,14 +329,14 @@ view model = div []
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
       |> concatMap ( \blocklink -> [
-          text (blockDisplay blocklink),
+          text ("• " ++ blockDisplay blocklink),
           br [] []
         ] )
       |> div [],
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool
       |> concatMap ( \tx -> [
-          text (txDisplay tx),
+          text ("• " ++ txDisplay tx),
           br [] []
         ] )
       |> div [],

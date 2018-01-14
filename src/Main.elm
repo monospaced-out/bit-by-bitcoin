@@ -6,8 +6,9 @@ import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice, toInt)
-import List exposing (head, concat, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length)
+import List exposing (head, concat, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length, sortWith, foldr)
 import Result exposing (withDefault)
+import Tuple exposing (second)
 import Json.Decode as Json
 
 
@@ -159,6 +160,31 @@ updateBalance addressBook transaction =
       else
         address
     )
+
+longestChain : List BlockLink -> List BlockLink
+longestChain validBlocks =
+  validBlocks
+    |> map (\blocklink ->
+        let
+          chain = chainForBlock blocklink
+        in
+          (length chain, chain)
+      )
+    |> foldr (\(l, longest) (c, current) ->
+        if c > l
+          then (c, current)
+        else
+          (l, longest)
+      ) (0, [])
+    |> second
+
+chainForBlock : BlockLink -> List BlockLink
+chainForBlock blocklink =
+  case blocklink of
+    OriginBlock ->
+      []
+    BlockLink block ->
+      BlockLink block :: chainForBlock block.previousBlock
 
 
 init : ( Model, Cmd Msg )

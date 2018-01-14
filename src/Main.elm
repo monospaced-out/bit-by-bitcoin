@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice)
-import List exposing (head, reverse, map, concatMap, indexedMap, filter, isEmpty)
+import List exposing (head, reverse, concatMap, indexedMap, filter, isEmpty)
 
 
 
@@ -82,7 +82,7 @@ minerActionDisplay model minerIndex =
 
 blockDisplay : BlockLink -> String
 blockDisplay blocklink =
-  slice 0 10 (blockLinkHash blocklink) ++ "..."
+  "• " ++ slice 0 10 (blockLinkHash blocklink) ++ "..."
 
 newMiner : Maybe Block -> Miner
 newMiner block = { blockToErase = block }
@@ -114,6 +114,16 @@ init =
   (
     {
       miners = [
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
+        newMiner Nothing,
         newMiner Nothing,
         newMiner Nothing,
         newMiner Nothing,
@@ -225,6 +235,13 @@ view model = div []
           ]
         )
       |> div [],
+    h2 [] [ text "Mined Blocks" ],
+    model.discoveredBlocks
+      |> concatMap ( \blocklink -> [
+          text (blockDisplay blocklink),
+          br [] []
+        ] )
+      |> div [],
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool
       |> concatMap ( \tx -> [
@@ -238,12 +255,6 @@ view model = div []
           text ("• " ++ address.hash ++ ": ? BTC"), -- fill in with computed BTC from blockchain
           br [] []
         ] )
-      |> div [],
-    h2 [] [ text "Mined Blocks" ],
-    model.discoveredBlocks
-      |> map ( \blocklink ->
-          text (blockDisplay blocklink)
-        )
       |> div []
   ]
 

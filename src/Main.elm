@@ -246,7 +246,7 @@ view model = div []
     h2 [] [ text "Joe Schmo's Neighborhood" ],
     take numMainAddresses model.addressBook
       |> concatMap ( \address -> [
-          text ("• " ++ hashDisplay address.hash ++ " ? BTC"), -- fill in with computed BTC from blockchain
+          text ("• " ++ hashDisplay address.hash ++ " " ++ toString address.balance ++ " BTC"), -- fill in with computed BTC from blockchain
           br [] []
         ] )
       |> div []

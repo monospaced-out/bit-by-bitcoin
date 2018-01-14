@@ -187,21 +187,17 @@ mine model =
               )
               |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
           in
-            if not (isEmpty results)
-            then
-              case head results of
-                Nothing ->
-                  model
-                Just (nonce, hash) ->
-                  { model |
-                    discoveredBlocks = BlockLink {
-                      transaction = transaction,
-                      previousBlock = block,
-                      nonce = nonce
-                    } :: model.discoveredBlocks
-                  }
-            else
-              model
+            case head results of
+              Nothing ->
+                model
+              Just (nonce, hash) ->
+                { model |
+                  discoveredBlocks = BlockLink {
+                    transaction = transaction,
+                    previousBlock = block,
+                    nonce = nonce
+                  } :: model.discoveredBlocks
+                }
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =

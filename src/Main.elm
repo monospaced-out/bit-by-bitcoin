@@ -31,12 +31,8 @@ type alias Transaction = {
 }
 
 type alias Address = {
-  hash : String
-}
-
-type alias Balance = {
-  address : Address,
-  amount : Int
+  hash : String,
+  balance : Int
 }
 
 type alias Model = {
@@ -44,8 +40,7 @@ type alias Model = {
   discoveredBlocks : List BlockLink,
   transactionPool : List Transaction,
   mainAddresses : List Address,
-  randomValue : Int,
-  initialBalances : List Balance
+  randomValue : Int
 }
 
 txHash : Transaction -> String
@@ -102,14 +97,14 @@ hashDisplay hash = slice 0 10 hash ++ "..."
 newMiner : Maybe Block -> Miner
 newMiner block = { blockToErase = block }
 
-newAddress : Int -> Address
-newAddress seed = { hash = sha256 (toString seed) }
+newAddress : Int -> Int -> Address
+newAddress seed balance = { hash = sha256 (toString seed), balance = balance }
 
 newTx : Int -> Int -> Int -> Transaction
 newTx senderSeed recipientSeed amount =
   {
-    sender = newAddress senderSeed,
-    recipient = newAddress recipientSeed,
+    sender = newAddress senderSeed 10,
+    recipient = newAddress recipientSeed 10,
     amount = amount
   }
 
@@ -164,17 +159,13 @@ init =
         newTx 29 30 1
       ],
       mainAddresses = [
-        newAddress 0,
-        newAddress 1,
-        newAddress 2,
-        newAddress 3,
-        newAddress 4
+        newAddress 0 10,
+        newAddress 1 10,
+        newAddress 2 10,
+        newAddress 3 10,
+        newAddress 4 10
       ],
-      randomValue = 0,
-      initialBalances = range 0 500
-        |> map ( \i ->
-          { address = newAddress i, amount = 10 }
-        )
+      randomValue = 0
     },
     Random.generate RandomEvent (Random.int 1 100000)
   )

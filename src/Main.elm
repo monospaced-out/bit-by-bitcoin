@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice)
-import List exposing (head, reverse, map, concatMap, indexedMap)
+import List exposing (head, reverse, map, concatMap, indexedMap, filter, isEmpty)
 
 
 
@@ -157,12 +157,38 @@ init =
 
 type Msg = Next | RandomEvent Int
 
+mine : Model -> Model
+mine model =
+  case head model.transactionPool of
+    Nothing ->
+      model
+    Just transaction ->
+      case head <| reverse <| model.discoveredBlocks of
+        Nothing ->
+          model
+        Just block ->
+          let
+            results = model.miners
+              |> indexedMap (
+                \m miner -> ((chooseNonce m model.randomValue), (testBlockHash transaction block m model.randomValue))
+              )
+              |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
+          in
+            if not (isEmpty results)
+            then
+              case head results of
+                Nothing ->
+                  model
+                Just (nonce, hash) ->
+                  { model | discoveredBlocks = BlockLink { transaction = transaction, previousBlock = block, nonce = nonce } :: model.discoveredBlocks }
+            else
+              model
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Next ->
-      ( { model | randomValue = 1 }, Random.generate RandomEvent (Random.int 1 100000) )
+      ( mine model, Random.generate RandomEvent (Random.int 1 100000) )
     RandomEvent randomValue ->
       ({ model | randomValue = randomValue }, Cmd.none)
 

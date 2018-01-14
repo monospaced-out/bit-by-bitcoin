@@ -1,12 +1,12 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, button, text, div, h1, h2, br, form, input, select, option)
+import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option)
 import Html.Attributes exposing (style, type_, value)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice, toInt)
-import List exposing (head, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length)
+import List exposing (head, concat, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length)
 import Result exposing (withDefault)
 import Json.Decode as Json
 
@@ -328,10 +328,17 @@ view model = div []
       |> div [],
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
-      |> concatMap ( \blocklink -> [
+      |> indexedMap ( \b blocklink -> [
+          if b == 6
+            then h3 [] [ text "Confirmed" ]
+          else if b == 0
+            then h3 [] [ text "Unconfirmed" ]
+          else
+            text "",
           text ("• " ++ blockDisplay blocklink),
           br [] []
         ] )
+      |> concat
       |> div [],
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool

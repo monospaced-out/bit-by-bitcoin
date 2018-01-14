@@ -82,7 +82,12 @@ minerActionDisplay model minerIndex =
 
 blockDisplay : BlockLink -> String
 blockDisplay blocklink =
-  "• " ++ hashDisplay (blockLinkHash blocklink)
+  "• " ++ hashDisplay (blockLinkHash blocklink) ++
+  case blocklink of
+    OriginBlock ->
+      " (origin block)"
+    BlockLink block ->
+      " {transaction: " ++ hashDisplay (txHash block.transaction) ++ ", nonce: " ++ block.nonce ++ ", previousBlock: " ++ hashDisplay (blockLinkHash block.previousBlock) ++ "}"
 
 hashDisplay : String -> String
 hashDisplay hash = slice 0 10 hash ++ "..."

@@ -20,7 +20,8 @@ type BlockLink = BlockLink Block | OriginBlock
 type alias Block = {
   transaction : Transaction,
   previousBlock : BlockLink,
-  nonce : String
+  nonce : String,
+  hashCache : String
 }
 
 type alias Transaction = {
@@ -53,9 +54,7 @@ txHash tx =
   |> sha256
 
 blockHash : Block -> String
-blockHash block =
-  txHash block.transaction ++ blockLinkHash block.previousBlock ++ block.nonce
-  |> sha256
+blockHash block = block.hashCache
 
 blockLinkHash : BlockLink -> String
 blockLinkHash blocklink =
@@ -215,7 +214,8 @@ mine model =
                   discoveredBlocks = BlockLink {
                     transaction = transaction,
                     previousBlock = block,
-                    nonce = nonce
+                    nonce = nonce,
+                    hashCache = hash
                   } :: model.discoveredBlocks,
                   transactionPool = append (drop 1 model.transactionPool) [newTx model.randomValue (model.randomValue + 1) 1]
                 }

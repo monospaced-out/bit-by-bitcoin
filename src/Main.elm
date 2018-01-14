@@ -93,7 +93,9 @@ blockDisplay blocklink =
     OriginBlock ->
       " (origin block)"
     BlockLink block ->
-      " {transaction: " ++ hashDisplay (txHash block.transaction) ++ ", nonce: " ++ block.nonce ++ ", previousBlock: " ++ hashDisplay (blockLinkHash block.previousBlock) ++ "}"
+      " {transaction: " ++ hashDisplay (txHash block.transaction) ++
+        ", nonce: " ++ block.nonce ++ ", previousBlock: " ++
+        hashDisplay (blockLinkHash block.previousBlock) ++ "}"
 
 hashDisplay : String -> String
 hashDisplay hash = slice 0 10 hash ++ "..."

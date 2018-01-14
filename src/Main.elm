@@ -148,6 +148,19 @@ findAddress hash addresses =
       Just address ->
         address
 
+updateBalance : List Address -> Transaction -> List Address
+updateBalance addressBook transaction =
+  addressBook
+    |> map (\address ->
+      if address.hash == transaction.sender.hash
+        then { address | balance = address.balance - transaction.amount }
+      else if address.hash == transaction.receiver.hash
+        then { address | balance = address.balance + transaction.amount }
+      else
+        address
+    )
+
+
 init : ( Model, Cmd Msg )
 init =
   (
@@ -204,6 +217,10 @@ mine model =
             newTransactionPool = if (length model.transactionPool) <= 4
               then append removeMinedTx [replacementTx]
               else removeMinedTx
+            withNewAddresses = (append model.addressBook [
+              (newAddress newTxSender newAddressBalance),
+              (newAddress newTxReceiver newAddressBalance)
+            ])
           in
             case head results of
               Nothing ->
@@ -217,10 +234,7 @@ mine model =
                     hashCache = hash
                   } :: model.discoveredBlocks,
                   transactionPool = newTransactionPool,
-                  addressBook = append model.addressBook [
-                    (newAddress newTxSender newAddressBalance),
-                    (newAddress newTxReceiver newAddressBalance)
-                  ]
+                  addressBook = updateBalance withNewAddresses transaction
                 }
 
 inputTxSender : Model -> String -> Model

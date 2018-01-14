@@ -180,7 +180,10 @@ mine model =
           let
             results = model.miners
               |> indexedMap (
-                \m miner -> ((chooseNonce m model.randomValue), (testBlockHash transaction block m model.randomValue))
+                \m miner -> (
+                  (chooseNonce m model.randomValue),
+                  (testBlockHash transaction block m model.randomValue)
+                )
               )
               |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
           in
@@ -190,7 +193,13 @@ mine model =
                 Nothing ->
                   model
                 Just (nonce, hash) ->
-                  { model | discoveredBlocks = BlockLink { transaction = transaction, previousBlock = block, nonce = nonce } :: model.discoveredBlocks }
+                  { model |
+                    discoveredBlocks = BlockLink {
+                      transaction = transaction,
+                      previousBlock = block,
+                      nonce = nonce
+                    } :: model.discoveredBlocks
+                  }
             else
               model
 

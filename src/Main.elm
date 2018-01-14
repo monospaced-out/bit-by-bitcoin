@@ -181,7 +181,7 @@ mine model =
     Nothing ->
       model
     Just transaction ->
-      case head <| reverse <| model.discoveredBlocks of
+      case head <| model.discoveredBlocks of
         Nothing ->
           model
         Just block ->

@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice)
-import List exposing (head, reverse, concatMap, indexedMap, filter, isEmpty, drop, append)
+import List exposing (head, concatMap, indexedMap, filter, isEmpty, drop, append)
 
 
 
@@ -73,7 +73,7 @@ minerActionDisplay model minerIndex =
     Nothing ->
       ""
     Just transaction ->
-      case head <| reverse <| model.discoveredBlocks of
+      case head <| model.discoveredBlocks of
         Nothing ->
           ""
         Just block ->
@@ -226,7 +226,7 @@ minerStyle model minerIndex =
     Nothing ->
       style []
     Just transaction ->
-      case head <| reverse <| model.discoveredBlocks of
+      case head <| model.discoveredBlocks of
         Nothing ->
           style []
         Just block ->

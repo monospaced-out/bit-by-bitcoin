@@ -1,12 +1,14 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, button, text, div, h1, h2, br)
-import Html.Attributes exposing (style)
-import Html.Events exposing (onClick)
+import Html exposing (Html, Attribute, button, text, div, h1, h2, br, form, input, select, option)
+import Html.Attributes exposing (style, type_, value)
+import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Sha256 exposing (sha256)
 import Random
-import String exposing (slice)
+import String exposing (slice, toInt)
 import List exposing (head, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length)
+import Result exposing (withDefault)
+import Json.Decode as Json
 
 
 numMainAddresses = 5
@@ -42,7 +44,14 @@ type alias Model = {
   discoveredBlocks : List BlockLink,
   transactionPool : List Transaction,
   addressBook : List Address,
-  randomValue : Int
+  randomValue : Int,
+  txForm: TxForm
+}
+
+type alias TxForm = {
+  sender : String,
+  recipient : String,
+  amount : Int
 }
 
 txHash : Transaction -> String
@@ -138,7 +147,12 @@ init =
         |> map (\i -> newTx (2 * i + numMainAddresses) (2 * i + numMainAddresses + 1) 1),
       addressBook = range 0 (lastMainAddressIndex + 8)
         |> map (\i -> newAddress i 10),
-      randomValue = 0
+      randomValue = 0,
+      txForm = {
+        sender = "",
+        recipient = "",
+        amount = 0
+      }
     },
     Random.generate RandomEvent (Random.int 1 100000)
   )
@@ -148,7 +162,7 @@ init =
 ---- UPDATE ----
 
 
-type Msg = Next | RandomEvent Int
+type Msg = Next | PostTx | InputTxSender String | InputTxRecipient String | InputTxAmount String | RandomEvent Int
 
 mine : Model -> Model
 mine model =
@@ -194,17 +208,54 @@ mine model =
                   ]
                 }
 
+inputTxSender : Model -> String -> Model
+inputTxSender model value =
+  let
+    oldForm = model.txForm
+    newForm = { oldForm | sender = value }
+  in
+    { model | txForm = newForm }
+
+inputTxRecipient : Model -> String -> Model
+inputTxRecipient model value =
+  let
+    oldForm = model.txForm
+    newForm = { oldForm | recipient = value }
+  in
+    { model | txForm = newForm }
+
+inputTxAmount : Model -> String -> Model
+inputTxAmount model value =
+  let
+    oldForm = model.txForm
+    newForm = { oldForm | amount = withDefault 0 (toInt value) }
+  in
+    { model | txForm = newForm }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Next ->
       ( mine model, Random.generate RandomEvent (Random.int 1 100000) )
+    PostTx ->
+      ( model , Cmd.none )
+    InputTxSender value ->
+      ( inputTxSender model value, Cmd.none )
+    InputTxRecipient value ->
+      ( inputTxRecipient model value, Cmd.none )
+    InputTxAmount value ->
+      ( inputTxAmount model value, Cmd.none )
     RandomEvent randomValue ->
       ({ model | randomValue = randomValue }, Cmd.none)
 
 
 ---- VIEW ----
 
+-- https://github.com/tbasse/elm-spinner/commit/f96315660354612db67bea37983dab840d389859
+onChange : (String -> msg) -> Html.Attribute msg
+onChange handler =
+    on "change" <| Json.map handler <| Json.at ["target", "value"] Json.string
 
 minerStyle : Model -> Int -> Attribute msg
 minerStyle model minerIndex =
@@ -255,7 +306,30 @@ view model = div []
           text ("• " ++ hashDisplay address.hash ++ " " ++ toString address.balance ++ " BTC"), -- fill in with computed BTC from blockchain
           br [] []
         ] )
-      |> div []
+      |> div [],
+    h2 [] [ text "Send Transaction" ],
+    form [ onSubmit PostTx ] [
+      text("From: "),
+      select [ onChange InputTxSender ] (
+        take numMainAddresses model.addressBook
+          |> map ( \address ->
+              option [ value address.hash ] [ text (hashDisplay address.hash) ]
+            )
+      ),
+      br [] [],
+      text("To: "),
+      select [ onChange InputTxRecipient ] (
+        take numMainAddresses model.addressBook
+          |> map ( \address ->
+              option [ value address.hash ] [ text (hashDisplay address.hash) ]
+            )
+      ),
+      br [] [],
+      text("Amount: "),
+      input [ onInput InputTxAmount, type_ "number", Html.Attributes.min "0" ] [],
+      br [] [],
+      input [ type_ "submit" ] []
+    ]
   ]
 
 

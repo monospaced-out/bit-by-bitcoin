@@ -34,7 +34,7 @@ type alias Address = {
 
 type alias Model = {
   miners : List Miner,
-  originBlock : BlockLink,
+  discoveredBlocks : List BlockLink,
   transactionPool : List Transaction,
   mainAddresses : List Address,
   randomValue : Int
@@ -72,8 +72,12 @@ minerActionDisplay model minerIndex =
     Nothing ->
       ""
     Just transaction ->
-      ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++ ": " ++
-        String.slice 0 10 (testBlockHash transaction model.originBlock minerIndex model.randomValue) ++ "..."
+      case List.head <| List.reverse <| model.discoveredBlocks of
+        Nothing ->
+          ""
+        Just block ->
+          ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++ ": " ++
+            String.slice 0 10 (testBlockHash transaction block minerIndex model.randomValue) ++ "..."
 
 newMiner : Maybe Block -> Miner
 newMiner block = { blockToErase = block }
@@ -116,7 +120,7 @@ init =
         newMiner Nothing,
         newMiner Nothing
       ],
-      originBlock = OriginBlock,
+      discoveredBlocks = [OriginBlock],
       transactionPool = [
         newTx 11 12 1,
         newTx 13 14 1,
@@ -167,9 +171,13 @@ minerStyle model minerIndex =
     Nothing ->
       style []
     Just transaction ->
-      if (String.slice 0 2 (testBlockHash transaction model.originBlock minerIndex model.randomValue)) == "00"
-        then style [ ("backgroundColor", "green") , ("color", "white") ]
-        else style []
+      case List.head <| List.reverse <| model.discoveredBlocks of
+        Nothing ->
+          style []
+        Just block ->
+          if (String.slice 0 2 (testBlockHash transaction block minerIndex model.randomValue)) == "00"
+            then style [ ("backgroundColor", "green") , ("color", "white") ]
+            else style []
 
 view : Model -> Html Msg
 view model = div []

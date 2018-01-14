@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice)
-import List exposing (head, reverse, concatMap, indexedMap, filter, isEmpty)
+import List exposing (head, reverse, concatMap, indexedMap, filter, isEmpty, drop, append)
 
 
 
@@ -204,7 +204,8 @@ mine model =
                     transaction = transaction,
                     previousBlock = block,
                     nonce = nonce
-                  } :: model.discoveredBlocks
+                  } :: model.discoveredBlocks,
+                  transactionPool = append (drop 1 model.transactionPool) [newTx model.randomValue (model.randomValue + 1) 1]
                 }
 
 update : Msg -> Model -> ( Model, Cmd Msg )

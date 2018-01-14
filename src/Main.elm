@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random exposing (generate, int)
 import String exposing (slice)
+import List exposing (head, reverse, map, concatMap, indexedMap)
 
 
 
@@ -68,16 +69,16 @@ minerDisplay miner =
 
 minerActionDisplay : Model -> Int -> String
 minerActionDisplay model minerIndex =
-  case List.head model.transactionPool of
+  case head model.transactionPool of
     Nothing ->
       ""
     Just transaction ->
-      case List.head <| List.reverse <| model.discoveredBlocks of
+      case head <| reverse <| model.discoveredBlocks of
         Nothing ->
           ""
         Just block ->
           ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++ ": " ++
-            String.slice 0 10 (testBlockHash transaction block minerIndex model.randomValue) ++ "..."
+            slice 0 10 (testBlockHash transaction block minerIndex model.randomValue) ++ "..."
 
 blockDisplay : BlockLink -> String
 blockDisplay blocklink =
@@ -101,7 +102,7 @@ chooseNonce : Int -> Int -> String
 chooseNonce minerIndex seed = minerIndex + seed
   |> toString
   |> sha256
-  |> String.slice 0 5
+  |> slice 0 5
 
 testBlockHash : Transaction -> BlockLink -> Int -> Int -> String
 testBlockHash tx previousBlock minerIndex seed =
@@ -171,15 +172,15 @@ update msg model =
 
 minerStyle : Model -> Int -> Attribute msg
 minerStyle model minerIndex =
-  case List.head model.transactionPool of
+  case head model.transactionPool of
     Nothing ->
       style []
     Just transaction ->
-      case List.head <| List.reverse <| model.discoveredBlocks of
+      case head <| reverse <| model.discoveredBlocks of
         Nothing ->
           style []
         Just block ->
-          if (String.slice 0 2 (testBlockHash transaction block minerIndex model.randomValue)) == "00"
+          if (slice 0 2 (testBlockHash transaction block minerIndex model.randomValue)) == "00"
             then style [ ("backgroundColor", "green") , ("color", "white") ]
             else style []
 
@@ -190,7 +191,7 @@ view model = div []
     button [ onClick Next ] [ text "Next" ],
     h2 [] [ text "Miners" ],
     model.miners
-      |> List.indexedMap ( \m miner ->
+      |> indexedMap ( \m miner ->
           div [ minerStyle model m ] [
             minerDisplay miner |> text,
             minerActionDisplay model m |> text,
@@ -200,21 +201,21 @@ view model = div []
       |> div [],
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool
-      |> List.concatMap ( \tx -> [
+      |> concatMap ( \tx -> [
           text ("• " ++ txHash tx),
           br [] []
         ] )
       |> div [],
     h2 [] [ text "Joe Schmo's Neighborhood" ],
     model.mainAddresses
-      |> List.concatMap ( \address -> [
+      |> concatMap ( \address -> [
           text ("• " ++ address.hash ++ ": ? BTC"), -- fill in with computed BTC from blockchain
           br [] []
         ] )
       |> div [],
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
-      |> List.map ( \blocklink ->
+      |> map ( \blocklink ->
           text (blockDisplay blocklink)
         )
       |> div []

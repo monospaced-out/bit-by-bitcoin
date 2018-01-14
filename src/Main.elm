@@ -134,9 +134,9 @@ init =
       miners = range 0 19
         |> map (\n -> newMiner Nothing),
       discoveredBlocks = [OriginBlock],
-      transactionPool = range 0 (lastMainAddressIndex + 5)
+      transactionPool = range 0 3
         |> map (\i -> newTx (2 * i + numMainAddresses) (2 * i + numMainAddresses + 1) 1),
-      addressBook = range 0 (lastMainAddressIndex + 20)
+      addressBook = range 0 (lastMainAddressIndex + 8)
         |> map (\i -> newAddress i 10),
       randomValue = 0
     },

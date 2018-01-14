@@ -125,28 +125,8 @@ init : ( Model, Cmd Msg )
 init =
   (
     {
-      miners = [
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing,
-        newMiner Nothing
-      ],
+      miners = range 0 19
+        |> map (\n -> newMiner Nothing),
       discoveredBlocks = [OriginBlock],
       transactionPool = range 0 (lastMainAddressIndex + 5)
         |> map (\i -> newTx (2 * i + numMainAddresses) (2 * i + numMainAddresses + 1) 1),

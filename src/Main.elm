@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice)
-import List exposing (head, concatMap, indexedMap, filter, isEmpty, drop, append)
+import List exposing (head, concatMap, indexedMap, filter, isEmpty, drop, append, range, map)
 
 
 
@@ -33,12 +33,18 @@ type alias Address = {
   hash : String
 }
 
+type alias Balance = {
+  address : Address,
+  amount : Int
+}
+
 type alias Model = {
   miners : List Miner,
   discoveredBlocks : List BlockLink,
   transactionPool : List Transaction,
   mainAddresses : List Address,
-  randomValue : Int
+  randomValue : Int,
+  initialBalances : List Balance
 }
 
 txHash : Transaction -> String
@@ -157,13 +163,17 @@ init =
         newTx 29 30 1
       ],
       mainAddresses = [
+        newAddress 0,
         newAddress 1,
         newAddress 2,
         newAddress 3,
-        newAddress 4,
-        newAddress 5
+        newAddress 4
       ],
-      randomValue = 0
+      randomValue = 0,
+      initialBalances = range 0 500
+        |> map ( \i ->
+          { address = newAddress i, amount = 10 }
+        )
     },
     Random.generate RandomEvent (Random.int 1 100000)
   )

@@ -78,11 +78,14 @@ minerActionDisplay model minerIndex =
           ""
         Just block ->
           ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++ ": " ++
-            slice 0 10 (testBlockHash transaction block minerIndex model.randomValue) ++ "..."
+            hashDisplay (testBlockHash transaction block minerIndex model.randomValue)
 
 blockDisplay : BlockLink -> String
 blockDisplay blocklink =
-  "• " ++ slice 0 10 (blockLinkHash blocklink) ++ "..."
+  "• " ++ hashDisplay (blockLinkHash blocklink)
+
+hashDisplay : String -> String
+hashDisplay hash = slice 0 10 hash ++ "..."
 
 newMiner : Maybe Block -> Miner
 newMiner block = { blockToErase = block }
@@ -250,14 +253,14 @@ view model = div []
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool
       |> concatMap ( \tx -> [
-          text ("• " ++ txHash tx),
+          text ("• " ++ hashDisplay (txHash tx)),
           br [] []
         ] )
       |> div [],
     h2 [] [ text "Joe Schmo's Neighborhood" ],
     model.mainAddresses
       |> concatMap ( \address -> [
-          text ("• " ++ address.hash ++ ": ? BTC"), -- fill in with computed BTC from blockchain
+          text ("• " ++ hashDisplay address.hash ++ " ? BTC"), -- fill in with computed BTC from blockchain
           br [] []
         ] )
       |> div []

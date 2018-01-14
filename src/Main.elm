@@ -6,9 +6,11 @@ import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice)
-import List exposing (head, concatMap, indexedMap, filter, isEmpty, drop, append, range, map)
+import List exposing (head, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length)
 
 
+numMainAddresses = 5
+lastMainAddressIndex = numMainAddresses - 1
 
 ---- MODEL ----
 
@@ -39,7 +41,7 @@ type alias Model = {
   miners : List Miner,
   discoveredBlocks : List BlockLink,
   transactionPool : List Transaction,
-  mainAddresses : List Address,
+  addressBook : List Address,
   randomValue : Int
 }
 
@@ -146,25 +148,10 @@ init =
         newMiner Nothing
       ],
       discoveredBlocks = [OriginBlock],
-      transactionPool = [
-        newTx 11 12 1,
-        newTx 13 14 1,
-        newTx 15 16 1,
-        newTx 17 18 1,
-        newTx 19 20 1,
-        newTx 21 22 1,
-        newTx 23 24 1,
-        newTx 25 26 1,
-        newTx 27 28 1,
-        newTx 29 30 1
-      ],
-      mainAddresses = [
-        newAddress 0 10,
-        newAddress 1 10,
-        newAddress 2 10,
-        newAddress 3 10,
-        newAddress 4 10
-      ],
+      transactionPool = range 0 (lastMainAddressIndex + 5)
+        |> map (\i -> newTx (2 * i + numMainAddresses) (2 * i + numMainAddresses + 1) 1),
+      addressBook = range 0 (lastMainAddressIndex + 20)
+        |> map (\i -> newAddress i 10),
       randomValue = 0
     },
     Random.generate RandomEvent (Random.int 1 100000)
@@ -208,7 +195,8 @@ mine model =
                     nonce = nonce,
                     hashCache = hash
                   } :: model.discoveredBlocks,
-                  transactionPool = append (drop 1 model.transactionPool) [newTx model.randomValue (model.randomValue + 1) 1]
+                  transactionPool = append (drop 1 model.transactionPool) [newTx (length model.addressBook) (length model.addressBook + 1) 1],
+                  addressBook = append model.addressBook [(newAddress (length model.addressBook) 10), (newAddress (length model.addressBook + 1) 10)]
                 }
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -267,7 +255,7 @@ view model = div []
         ] )
       |> div [],
     h2 [] [ text "Joe Schmo's Neighborhood" ],
-    model.mainAddresses
+    take numMainAddresses model.addressBook
       |> concatMap ( \address -> [
           text ("• " ++ hashDisplay address.hash ++ " ? BTC"), -- fill in with computed BTC from blockchain
           br [] []

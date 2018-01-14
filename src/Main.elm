@@ -163,6 +163,12 @@ mine model =
                 )
               )
               |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
+            newTxSender = length model.addressBook
+            newTxRecipient = length model.addressBook + 1
+            newTxAmount = 1
+            newAddressBalance = 10
+            removeMinedTx = (drop 1 model.transactionPool)
+            replacementTx = newTx newTxSender newTxRecipient newTxAmount
           in
             case head results of
               Nothing ->
@@ -175,8 +181,11 @@ mine model =
                     nonce = nonce,
                     hashCache = hash
                   } :: model.discoveredBlocks,
-                  transactionPool = append (drop 1 model.transactionPool) [newTx (length model.addressBook) (length model.addressBook + 1) 1],
-                  addressBook = append model.addressBook [(newAddress (length model.addressBook) 10), (newAddress (length model.addressBook + 1) 10)]
+                  transactionPool = append removeMinedTx [replacementTx],
+                  addressBook = append model.addressBook [
+                    (newAddress newTxSender newAddressBalance),
+                    (newAddress newTxRecipient newAddressBalance)
+                  ]
                 }
 
 update : Msg -> Model -> ( Model, Cmd Msg )

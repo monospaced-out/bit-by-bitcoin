@@ -4,7 +4,7 @@ import Html exposing (Html, Attribute, button, text, div, h1, h2, br)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Sha256 exposing (sha256)
-import Random exposing (generate, int)
+import Random
 import String exposing (slice)
 import List exposing (head, reverse, map, concatMap, indexedMap)
 

@@ -201,6 +201,9 @@ mine model =
             newAddressBalance = 10
             removeMinedTx = (drop 1 model.transactionPool)
             replacementTx = newTx newTxSender newTxReceiver newTxAmount
+            newTransactionPool = if (length model.transactionPool) <= 4
+              then append removeMinedTx [replacementTx]
+              else removeMinedTx
           in
             case head results of
               Nothing ->
@@ -213,7 +216,7 @@ mine model =
                     nonce = nonce,
                     hashCache = hash
                   } :: model.discoveredBlocks,
-                  transactionPool = append removeMinedTx [replacementTx],
+                  transactionPool = newTransactionPool,
                   addressBook = append model.addressBook [
                     (newAddress newTxSender newAddressBalance),
                     (newAddress newTxReceiver newAddressBalance)

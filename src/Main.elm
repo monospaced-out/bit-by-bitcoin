@@ -410,7 +410,7 @@ view model = div []
     take numMainAddresses model.addressBook
       |> withUpdatedBalances (longestChain model.discoveredBlocks)
       |> concatMap ( \address -> [
-          text ("• " ++ hashDisplay address.hash ++ " " ++ toString address.balance ++ " BTC"), -- fill in with computed BTC from blockchain
+          text ("• " ++ hashDisplay address.hash ++ " " ++ toString address.balance ++ " BTC"),
           br [] []
         ] )
       |> div [],

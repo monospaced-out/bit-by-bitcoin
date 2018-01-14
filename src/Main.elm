@@ -93,6 +93,12 @@ blockDisplay blocklink =
         ", nonce: " ++ block.nonce ++ ", previousBlock: " ++
         hashDisplay (blockLinkHash block.previousBlock) ++ "}"
 
+txDisplay : Transaction -> String
+txDisplay tx =
+  "• " ++ hashDisplay (txHash tx) ++ " {from: " ++ hashDisplay tx.sender.hash ++
+    ", to: " ++ hashDisplay tx.recipient.hash ++ ", amount: " ++
+    toString tx.amount ++ "BTC}"
+
 hashDisplay : String -> String
 hashDisplay hash = slice 0 10 hash ++ "..."
 
@@ -239,7 +245,7 @@ view model = div []
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool
       |> concatMap ( \tx -> [
-          text ("• " ++ hashDisplay (txHash tx)),
+          text (txDisplay tx),
           br [] []
         ] )
       |> div [],

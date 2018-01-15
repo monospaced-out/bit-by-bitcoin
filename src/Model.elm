@@ -27,7 +27,7 @@ type alias Miner = { blockToErase : BlockLink }
 type alias Block = {
   transaction : Transaction,
   previousBlock : BlockLink,
-  nextBlock : BlockLink,
+  nextBlocks : List BlockLink,
   nonce : String,
   hashCache : String
 }
@@ -134,11 +134,7 @@ isTip blocklink =
     NoBlock ->
       True
     BlockLink block ->
-      case block.nextBlock of
-        NoBlock ->
-          True
-        BlockLink block ->
-          False
+      length block.nextBlocks == 0
 
 withUpdatedBalances : List BlockLink -> List Address -> List Address
 withUpdatedBalances blockchain addresses =

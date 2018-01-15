@@ -77,7 +77,7 @@ mine model =
                     newBlock = BlockLink {
                       transaction = transaction,
                       previousBlock = block,
-                      nextBlock = NoBlock,
+                      nextBlocks = [],
                       nonce = nonce,
                       hashCache = hash
                     }
@@ -119,7 +119,7 @@ setNextBlock oldBlock newBlock allBlocks =
             blocklink
           BlockLink block ->
             if blockHash block == blockLinkHash oldBlock
-              then BlockLink { block | nextBlock = newBlock }
+              then BlockLink { block | nextBlocks = newBlock :: block.nextBlocks }
             else
               BlockLink block
       )

@@ -400,6 +400,13 @@ minerStyle model minerIndex =
               then style [ ("backgroundColor", "green") , ("color", "white") ]
               else style []
 
+txStyle : List BlockLink -> Transaction -> Attribute msg
+txStyle blockchain transaction =
+  if isValidTx blockchain transaction
+    then style []
+  else
+    style [ ("backgroundColor", "red") , ("color", "white") ]
+
 view : Model -> Html Msg
 view model = div []
   [
@@ -431,10 +438,12 @@ view model = div []
       |> div [],
     h2 [] [ text "Transaction Pool" ],
     model.transactionPool
-      |> concatMap ( \tx -> [
-          text ("• " ++ txDisplay tx),
-          br [] []
-        ] )
+      |> map ( \tx ->
+          div [ txStyle (longestChain model.discoveredBlocks) tx ] [
+            text ("• " ++ txDisplay tx),
+            br [] []
+          ]
+        )
       |> div [],
     h2 [] [ text "Joe Schmo's Neighborhood" ],
     take numMainAddresses model.addressBook

@@ -20,7 +20,7 @@ transactionPoolSize = 4
 ---- MODEL ----
 
 
-type alias Miner = { blockToErase : Maybe Block }
+type alias Miner = { blockToErase : BlockLink }
 
 type BlockLink = BlockLink Block | NoBlock
 
@@ -77,9 +77,9 @@ blockLinkHash blocklink =
 minerDisplay : Miner -> String
 minerDisplay miner =
   case miner.blockToErase of
-    Nothing ->
+    NoBlock ->
       "just chillin"
-    Just block ->
+    BlockLink block ->
       "Trying to erase block: " ++ blockHash block
 
 minerActionDisplay : Model -> Int -> String
@@ -119,8 +119,8 @@ txDisplay tx =
 hashDisplay : String -> String
 hashDisplay hash = slice 0 10 hash ++ "..."
 
-newMiner : Maybe Block -> Miner
-newMiner block = { blockToErase = block }
+newMiner : BlockLink -> Miner
+newMiner blocklink = { blockToErase = blocklink }
 
 newAddress : Int -> Int -> Address
 newAddress seed balance = { hash = sha256 (toString seed), balance = balance }
@@ -264,7 +264,7 @@ init =
   (
     {
       miners = range 0 19
-        |> map (\n -> newMiner Nothing),
+        |> map (\n -> newMiner NoBlock),
       discoveredBlocks = [ NoBlock ],
       transactionPool = range 0 3
         |> map (\i -> newTx (2 * i + numMainAddresses) (2 * i + numMainAddresses + 1) 1),
@@ -285,7 +285,7 @@ init =
 ---- UPDATE ----
 
 
-type Msg = Next | PostTx | InputTxSender String | InputTxReceiver String | InputTxAmount String | RandomEvent Int
+type Msg = Next | PostTx | InputTxSender String | InputTxReceiver String | InputTxAmount String | SelectEraseBlock String Int  | RandomEvent Int
 
 mine : Model -> Model
 mine model =
@@ -401,6 +401,27 @@ inputTxAmount model value =
   in
     { model | txForm = newForm }
 
+selectEraseBlock : Model -> String -> Int -> Model
+selectEraseBlock model hash index =
+  let
+    matchingBlocks = model.discoveredBlocks
+      |> filter (\blocklink -> (blockLinkHash blocklink) == hash )
+    blockToErase =
+      case head matchingBlocks of
+        Nothing ->
+          NoBlock
+        Just blocklink ->
+          blocklink
+    updatedMiners = model.miners
+      |> indexedMap (\m miner ->
+          if m == index
+            then { miner | blockToErase = blockToErase }
+          else
+            miner
+        )
+  in
+    { model | miners = updatedMiners }
+
 postTx : Model -> Model
 postTx model =
   let
@@ -429,6 +450,8 @@ update msg model =
       ( inputTxReceiver model value, Cmd.none )
     InputTxAmount value ->
       ( inputTxAmount model value, Cmd.none )
+    SelectEraseBlock value index ->
+      ( selectEraseBlock model value index, Cmd.none )
     RandomEvent randomValue ->
       ({ model | randomValue = randomValue }, Cmd.none)
 
@@ -475,6 +498,13 @@ view model = div []
           div [ minerStyle model m ] [
             "• " ++ minerDisplay miner |> text,
             minerActionDisplay model m |> text,
+            select [ onChange (\s -> SelectEraseBlock s m) ] (
+              drop 1 model.discoveredBlocks
+                |> map ( \blocklink ->
+                    option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
+                  )
+                |> append [ option [] [ text "Block to erase" ] ]
+            ),
             br [] []
           ]
         )

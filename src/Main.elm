@@ -226,7 +226,7 @@ balanceFor blockchain address =
 
 isValidTx : List BlockLink -> Transaction -> Bool
 isValidTx blockchain transaction =
-  (balanceFor blockchain transaction.sender) > transaction.amount
+  (balanceFor blockchain transaction.sender) >= transaction.amount
 
 nextTx : List BlockLink -> List Transaction -> Maybe Transaction
 nextTx blockchain transactionPool =

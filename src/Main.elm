@@ -80,7 +80,7 @@ minerDisplay miner =
     NoBlock ->
       "just chillin"
     BlockLink block ->
-      "Trying to erase block: " ++ blockHash block
+      "Trying to erase block: " ++ hashDisplay (blockHash block)
 
 minerActionDisplay : Model -> Int -> String
 minerActionDisplay model minerIndex =

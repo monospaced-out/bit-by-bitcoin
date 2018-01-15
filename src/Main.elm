@@ -499,7 +499,14 @@ view model = div []
             "• " ++ minerDisplay miner |> text,
             minerActionDisplay model m |> text,
             select [ onChange (\s -> SelectEraseBlock s m) ] (
-              drop 1 model.discoveredBlocks
+              model.discoveredBlocks
+                |> filter ( \blocklink ->
+                    case blocklink of
+                      NoBlock ->
+                        False
+                      BlockLink block ->
+                        True
+                  )
                 |> map ( \blocklink ->
                     option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
                   )

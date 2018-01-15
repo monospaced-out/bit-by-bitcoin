@@ -310,22 +310,8 @@ mine model =
                   )
                 )
                 |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
-              newTxSender = length model.addressBook
-              newTxReceiver = length model.addressBook + 1
-              newTxAmount = 1
-              newAddressBalance = 10
-              removeMinedTx = model.transactionPool
+              withoutMinedTx = model.transactionPool
                 |> filter (\tx -> txHash tx /= txHash transaction )
-              replacementTx = newTx newTxSender newTxReceiver newTxAmount
-              newTransactionPool =
-                if length model.transactionPool <= transactionPoolSize
-                  then append removeMinedTx [replacementTx]
-                else
-                  removeMinedTx
-              withNewAddresses = (append model.addressBook [
-                (newAddress newTxSender newAddressBalance),
-                (newAddress newTxReceiver newAddressBalance)
-              ])
             in
               case head results of
                 Nothing ->
@@ -343,9 +329,30 @@ mine model =
                   in
                     { model |
                       discoveredBlocks = newBlock :: withUpdatedPreviousBlock,
-                      transactionPool = newTransactionPool,
-                      addressBook = withNewAddresses
+                      transactionPool = withoutMinedTx
                     }
+
+refillTransactionPool : Model -> Model
+refillTransactionPool model =
+  let
+    newAddressBalance = 10
+    newTxSender = length model.addressBook
+    newTxReceiver = length model.addressBook + 1
+    newTxAmount = 1
+    txToAdd = newTx newTxSender newTxReceiver newTxAmount
+    withNewTx = append model.transactionPool [ txToAdd ]
+    withNewAddresses = (append model.addressBook [
+      (newAddress newTxSender newAddressBalance),
+      (newAddress newTxReceiver newAddressBalance)
+    ])
+  in
+    if length model.transactionPool < transactionPoolSize
+      then refillTransactionPool { model |
+        transactionPool = withNewTx,
+        addressBook = withNewAddresses
+      }
+    else
+      model
 
 setNextBlock : BlockLink -> BlockLink -> List BlockLink -> List BlockLink
 setNextBlock oldBlock newBlock allBlocks =
@@ -401,7 +408,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Next ->
-      ( mine model, Random.generate RandomEvent (Random.int 1 100000) )
+      (
+        model |> mine |> refillTransactionPool,
+        Random.generate RandomEvent (Random.int 1 100000)
+      )
     PostTx ->
       ( postTx model, Cmd.none )
     InputTxSender value ->

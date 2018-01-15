@@ -218,7 +218,7 @@ balanceFor : List BlockLink -> Address -> Int
 balanceFor blockchain address =
   case head blockchain of
     Nothing ->
-      0
+      address.balance
     Just blocklink ->
       case blocklink of
         NoBlock ->

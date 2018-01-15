@@ -312,6 +312,15 @@ mine model =
                 |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
               withoutMinedTx = model.transactionPool
                 |> filter (\tx -> txHash tx /= txHash transaction )
+              withoutNextTxInvalid =
+                case head withoutMinedTx of
+                  Nothing ->
+                    withoutMinedTx
+                  Just tx ->
+                    if isValidTx (longestChain model.discoveredBlocks) tx
+                      then withoutMinedTx
+                    else
+                      drop 1 withoutMinedTx
             in
               case head results of
                 Nothing ->
@@ -329,7 +338,7 @@ mine model =
                   in
                     { model |
                       discoveredBlocks = newBlock :: withUpdatedPreviousBlock,
-                      transactionPool = withoutMinedTx
+                      transactionPool = withoutNextTxInvalid
                     }
 
 refillTransactionPool : Model -> Model

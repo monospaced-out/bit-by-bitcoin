@@ -82,16 +82,20 @@ minerDisplay miner =
 
 minerActionDisplay : Model -> Int -> String
 minerActionDisplay model minerIndex =
-  case head model.transactionPool of
-    Nothing ->
-      ""
-    Just transaction ->
-      case head <| model.discoveredBlocks of
-        Nothing ->
-          ""
-        Just block ->
-          ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++ ": " ++
-            hashDisplay (testBlockHash transaction block minerIndex model.randomValue)
+  let
+    nextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
+    previousBlock = head model.discoveredBlocks
+  in
+    case nextTransaction of
+      Nothing ->
+        "no next"
+      Just transaction ->
+        case previousBlock of
+          Nothing ->
+            "no previous"
+          Just block ->
+            ". trying nonce " ++ chooseNonce minerIndex model.randomValue ++ ": " ++
+              hashDisplay (testBlockHash transaction block minerIndex model.randomValue)
 
 blockDisplay : BlockLink -> String
 blockDisplay blocklink =
@@ -220,6 +224,25 @@ balanceFor blockchain address =
               Just remainingBlockchain ->
                 difference + balanceFor remainingBlockchain address
 
+isValidTx : List BlockLink -> Transaction -> Bool
+isValidTx blockchain transaction =
+  (balanceFor blockchain transaction.sender) > transaction.amount
+
+nextTx : List BlockLink -> List Transaction -> Maybe Transaction
+nextTx blockchain transactionPool =
+  case head transactionPool of
+    Nothing ->
+      Nothing
+    Just transaction ->
+      if isValidTx blockchain transaction
+        then Just transaction
+      else
+        case tail transactionPool of
+          Nothing ->
+            Nothing
+          Just remainingTransactions ->
+            nextTx blockchain remainingTransactions
+
 
 init : ( Model, Cmd Msg )
 init =
@@ -251,50 +274,54 @@ type Msg = Next | PostTx | InputTxSender String | InputTxReceiver String | Input
 
 mine : Model -> Model
 mine model =
-  case head model.transactionPool of
-    Nothing ->
-      model
-    Just transaction ->
-      case head <| model.discoveredBlocks of
-        Nothing ->
-          model
-        Just block ->
-          let
-            results = model.miners
-              |> indexedMap (
-                \m miner -> (
-                  (chooseNonce m model.randomValue),
-                  (testBlockHash transaction block m model.randomValue)
+  let
+    nextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
+    previousBlock = head model.discoveredBlocks
+  in
+    case nextTransaction of
+      Nothing ->
+        model
+      Just transaction ->
+        case previousBlock of
+          Nothing ->
+            model
+          Just block ->
+            let
+              results = model.miners
+                |> indexedMap (
+                  \m miner -> (
+                    (chooseNonce m model.randomValue),
+                    (testBlockHash transaction block m model.randomValue)
+                  )
                 )
-              )
-              |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
-            newTxSender = length model.addressBook
-            newTxReceiver = length model.addressBook + 1
-            newTxAmount = 1
-            newAddressBalance = 10
-            removeMinedTx = (drop 1 model.transactionPool)
-            replacementTx = newTx newTxSender newTxReceiver newTxAmount
-            newTransactionPool = if (length model.transactionPool) <= 4
-              then append removeMinedTx [replacementTx]
-              else removeMinedTx
-            withNewAddresses = (append model.addressBook [
-              (newAddress newTxSender newAddressBalance),
-              (newAddress newTxReceiver newAddressBalance)
-            ])
-          in
-            case head results of
-              Nothing ->
-                model
-              Just (nonce, hash) ->
-                { model |
-                  discoveredBlocks = BlockLink {
-                    transaction = transaction,
-                    previousBlock = block,
-                    nonce = nonce,
-                    hashCache = hash
-                  } :: model.discoveredBlocks,
-                  transactionPool = newTransactionPool
-                }
+                |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
+              newTxSender = length model.addressBook
+              newTxReceiver = length model.addressBook + 1
+              newTxAmount = 1
+              newAddressBalance = 10
+              removeMinedTx = model.transactionPool
+                |> filter (\tx -> txHash tx /= txHash transaction )
+              replacementTx = newTx newTxSender newTxReceiver newTxAmount
+              newTransactionPool = append removeMinedTx [replacementTx]
+              withNewAddresses = (append model.addressBook [
+                (newAddress newTxSender newAddressBalance),
+                (newAddress newTxReceiver newAddressBalance)
+              ])
+            in
+              case head results of
+                Nothing ->
+                  model
+                Just (nonce, hash) ->
+                  { model |
+                    discoveredBlocks = BlockLink {
+                      transaction = transaction,
+                      previousBlock = block,
+                      nonce = nonce,
+                      hashCache = hash
+                    } :: model.discoveredBlocks,
+                    transactionPool = newTransactionPool,
+                    addressBook = withNewAddresses
+                  }
 
 inputTxSender : Model -> String -> Model
 inputTxSender model value =
@@ -358,17 +385,20 @@ onChange handler =
 
 minerStyle : Model -> Int -> Attribute msg
 minerStyle model minerIndex =
-  case head model.transactionPool of
-    Nothing ->
-      style []
-    Just transaction ->
-      case head <| model.discoveredBlocks of
-        Nothing ->
-          style []
-        Just block ->
-          if (slice 0 2 (testBlockHash transaction block minerIndex model.randomValue)) == "00"
-            then style [ ("backgroundColor", "green") , ("color", "white") ]
-            else style []
+  let
+    nextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
+  in
+    case nextTransaction of
+      Nothing ->
+        style []
+      Just transaction ->
+        case head <| model.discoveredBlocks of
+          Nothing ->
+            style []
+          Just block ->
+            if (slice 0 2 (testBlockHash transaction block minerIndex model.randomValue)) == "00"
+              then style [ ("backgroundColor", "green") , ("color", "white") ]
+              else style []
 
 view : Model -> Html Msg
 view model = div []

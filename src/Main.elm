@@ -84,7 +84,7 @@ minerActionDisplay : Model -> Int -> String
 minerActionDisplay model minerIndex =
   let
     nextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
-    previousBlock = head model.discoveredBlocks
+    previousBlock = head (longestChain model.discoveredBlocks)
   in
     case nextTransaction of
       Nothing ->
@@ -187,7 +187,7 @@ chainForBlock : BlockLink -> List BlockLink
 chainForBlock blocklink =
   case blocklink of
     OriginBlock ->
-      []
+      [ OriginBlock ]
     BlockLink block ->
       BlockLink block :: chainForBlock block.previousBlock
 
@@ -203,11 +203,11 @@ balanceFor : List BlockLink -> Address -> Int
 balanceFor blockchain address =
   case head blockchain of
     Nothing ->
-      address.balance
+      0
     Just blocklink ->
       case blocklink of
         OriginBlock ->
-          0
+          address.balance
         BlockLink block ->
           let
             difference =
@@ -276,7 +276,7 @@ mine : Model -> Model
 mine model =
   let
     nextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
-    previousBlock = head model.discoveredBlocks
+    previousBlock = head (longestChain model.discoveredBlocks)
   in
     case nextTransaction of
       Nothing ->

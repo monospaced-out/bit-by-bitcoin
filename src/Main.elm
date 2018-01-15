@@ -170,6 +170,7 @@ updateBalance addressBook transaction =
 longestChain : List BlockLink -> List BlockLink
 longestChain validBlocks =
   validBlocks
+    |> filter (\blockLink -> isTip blockLink)
     |> map (\blocklink ->
         let
           chain = chainForBlock blocklink
@@ -191,6 +192,18 @@ chainForBlock blocklink =
       [ NoBlock ]
     BlockLink block ->
       BlockLink block :: chainForBlock block.previousBlock
+
+isTip : BlockLink -> Bool
+isTip blocklink =
+  case blocklink of
+    NoBlock ->
+      True
+    BlockLink block ->
+      case block.nextBlock of
+        NoBlock ->
+          True
+        BlockLink block ->
+          False
 
 withUpdatedBalances : List BlockLink -> List Address -> List Address
 withUpdatedBalances blockchain addresses =

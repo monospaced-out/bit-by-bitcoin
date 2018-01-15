@@ -21,7 +21,7 @@ confirmationsRequired = 6
 
 type alias Miner = { blockToErase : Maybe Block }
 
-type BlockLink = BlockLink Block | OriginBlock
+type BlockLink = BlockLink Block | NoBlock
 
 type alias Block = {
   transaction : Transaction,
@@ -67,7 +67,7 @@ blockHash block = block.hashCache
 blockLinkHash : BlockLink -> String
 blockLinkHash blocklink =
   case blocklink of
-    OriginBlock ->
+    NoBlock ->
       sha256 "0"
     BlockLink block ->
       blockHash block
@@ -101,7 +101,7 @@ blockDisplay : BlockLink -> String
 blockDisplay blocklink =
   hashDisplay (blockLinkHash blocklink) ++
   case blocklink of
-    OriginBlock ->
+    NoBlock ->
       " (origin block)"
     BlockLink block ->
       " {transaction: " ++ txDisplay block.transaction ++
@@ -186,8 +186,8 @@ longestChain validBlocks =
 chainForBlock : BlockLink -> List BlockLink
 chainForBlock blocklink =
   case blocklink of
-    OriginBlock ->
-      [ OriginBlock ]
+    NoBlock ->
+      [ NoBlock ]
     BlockLink block ->
       BlockLink block :: chainForBlock block.previousBlock
 
@@ -206,7 +206,7 @@ balanceFor blockchain address =
       0
     Just blocklink ->
       case blocklink of
-        OriginBlock ->
+        NoBlock ->
           address.balance
         BlockLink block ->
           let
@@ -250,7 +250,7 @@ init =
     {
       miners = range 0 19
         |> map (\n -> newMiner Nothing),
-      discoveredBlocks = [OriginBlock],
+      discoveredBlocks = [ NoBlock ],
       transactionPool = range 0 3
         |> map (\i -> newTx (2 * i + numMainAddresses) (2 * i + numMainAddresses + 1) 1),
       addressBook = range 0 (lastMainAddressIndex + 8)

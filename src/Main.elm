@@ -26,6 +26,7 @@ type BlockLink = BlockLink Block | NoBlock
 type alias Block = {
   transaction : Transaction,
   previousBlock : BlockLink,
+  nextBlock : BlockLink,
   nonce : String,
   hashCache : String
 }
@@ -312,16 +313,35 @@ mine model =
                 Nothing ->
                   model
                 Just (nonce, hash) ->
-                  { model |
-                    discoveredBlocks = BlockLink {
+                  let
+                    newBlock = BlockLink {
                       transaction = transaction,
                       previousBlock = block,
+                      nextBlock = NoBlock,
                       nonce = nonce,
                       hashCache = hash
-                    } :: model.discoveredBlocks,
-                    transactionPool = newTransactionPool,
-                    addressBook = withNewAddresses
-                  }
+                    }
+                    withUpdatedPreviousBlock = setNextBlock block newBlock model.discoveredBlocks
+                  in
+                    { model |
+                      discoveredBlocks = newBlock :: withUpdatedPreviousBlock,
+                      transactionPool = newTransactionPool,
+                      addressBook = withNewAddresses
+                    }
+
+setNextBlock : BlockLink -> BlockLink -> List BlockLink -> List BlockLink
+setNextBlock oldBlock newBlock allBlocks =
+  allBlocks
+    |> map (\blocklink ->
+        case blocklink of
+          NoBlock ->
+            blocklink
+          BlockLink block ->
+            if blockHash block == blockLinkHash oldBlock
+              then BlockLink { block | nextBlock = newBlock }
+            else
+              BlockLink block
+      )
 
 inputTxSender : Model -> String -> Model
 inputTxSender model value =

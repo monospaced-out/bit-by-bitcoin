@@ -15,6 +15,7 @@ import Json.Decode as Json
 numMainAddresses = 5
 lastMainAddressIndex = numMainAddresses - 1
 confirmationsRequired = 6
+transactionPoolSize = 4
 
 ---- MODEL ----
 
@@ -316,7 +317,11 @@ mine model =
               removeMinedTx = model.transactionPool
                 |> filter (\tx -> txHash tx /= txHash transaction )
               replacementTx = newTx newTxSender newTxReceiver newTxAmount
-              newTransactionPool = append removeMinedTx [replacementTx]
+              newTransactionPool =
+                if length model.transactionPool <= transactionPoolSize
+                  then append removeMinedTx [replacementTx]
+                else
+                  removeMinedTx
               withNewAddresses = (append model.addressBook [
                 (newAddress newTxSender newAddressBalance),
                 (newAddress newTxReceiver newAddressBalance)

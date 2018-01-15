@@ -6,9 +6,10 @@ import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Sha256 exposing (sha256)
 import Random
 import String exposing (slice, toInt)
-import List exposing (head, concat, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length, sortWith, foldr, tail)
+import List exposing (head, concat, concatMap, indexedMap, filter, isEmpty, drop, append, range, map, take, length, sortWith, foldr, tail, member)
 import Result exposing (withDefault)
-import Tuple exposing (second)
+import Tuple exposing (first, second)
+import Array exposing (fromList, get)
 import Json.Decode as Json
 
 
@@ -258,6 +259,52 @@ nextTx blockchain transactionPool =
           Just remainingTransactions ->
             nextTx blockchain remainingTransactions
 
+maliciousBlockToMine : List BlockLink -> Miner -> BlockLink
+maliciousBlockToMine blocklinks miner =
+  case miner.blockToErase of
+    NoBlock ->
+      NoBlock
+    BlockLink blockToErase ->
+      let
+        startBlock = blockToErase.previousBlock
+        chains = blocklinks
+          |> filter ( \blocklink -> isTip blocklink)
+          |> map ( \blocklink -> chainForBlock blocklink )
+          |> filter ( \chain -> member startBlock chain )
+          |> map ( \chain -> (chain, distanceToBlock chain startBlock) )
+          |> sortWith ( \(chain1, distance1) (chain2, distance2) ->
+              case compare distance1 distance2 of
+                LT -> GT
+                EQ -> EQ
+                GT -> LT
+            )
+        secondLongestChain = get 1 (fromList chains)
+      in
+        case secondLongestChain of
+          Nothing ->
+            startBlock
+          Just chain ->
+            case head (first chain) of
+              Nothing ->
+                NoBlock
+              Just blocklink ->
+                blocklink
+
+distanceToBlock : List BlockLink -> BlockLink -> Int
+distanceToBlock blocklinks target =
+  case head blocklinks of
+    Nothing ->
+      0
+    Just current ->
+      if current == target
+        then 0
+      else
+        case tail blocklinks of
+          Nothing ->
+            1 -- not reached unless target is not in blocklinks
+          Just remainingBlocks ->
+            1 + distanceToBlock remainingBlocks target
+
 
 init : ( Model, Cmd Msg )
 init =
@@ -300,16 +347,22 @@ mine model =
         case previousBlock of
           Nothing ->
             model
-          Just block ->
+          Just longestChainBlock ->
             let
               results = model.miners
-                |> indexedMap (
-                  \m miner -> (
-                    (chooseNonce m model.randomValue),
-                    (testBlockHash transaction block m model.randomValue)
+                |> indexedMap ( \m miner ->
+                    let blockToMine =
+                      case (maliciousBlockToMine model.discoveredBlocks miner) of
+                        NoBlock -> longestChainBlock
+                        BlockLink block -> BlockLink block
+                    in
+                      (
+                        (chooseNonce m model.randomValue),
+                        (testBlockHash transaction blockToMine m model.randomValue),
+                        blockToMine
+                      )
                   )
-                )
-                |> filter (\(nonce, hash) -> (slice 0 2 hash) == "00")
+                |> filter (\(nonce, hash, block) -> (slice 0 2 hash) == "00")
               withoutMinedTx = model.transactionPool
                 |> filter (\tx -> txHash tx /= txHash transaction )
               withoutNextTxInvalid =
@@ -325,7 +378,7 @@ mine model =
               case head results of
                 Nothing ->
                   model
-                Just (nonce, hash) ->
+                Just (nonce, hash, block) ->
                   let
                     newBlock = BlockLink {
                       transaction = transaction,

@@ -199,7 +199,7 @@ maliciousBlockToMine blocklinks miner =
         chains = blocklinks
           |> filter ( \blocklink -> isTip blocklink)
           |> map ( \blocklink -> chainForBlock blocklink )
-          |> filter ( \chain -> member startBlock chain )
+          |> filter ( \chain -> (member startBlock chain) && not (member miner.blockToErase chain) )
           |> map ( \chain -> (chain, distanceToBlock chain startBlock) )
           |> sortWith ( \(chain1, distance1) (chain2, distance2) ->
               case compare distance1 distance2 of
@@ -207,9 +207,9 @@ maliciousBlockToMine blocklinks miner =
                 EQ -> EQ
                 GT -> LT
             )
-        secondLongestChain = get 1 (fromList chains)
+        longestChain = get 0 (fromList chains)
       in
-        case secondLongestChain of
+        case longestChain of
           Nothing ->
             startBlock
           Just chain ->

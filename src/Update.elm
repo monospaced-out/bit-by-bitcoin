@@ -81,7 +81,8 @@ mine model =
                       nonce = nonce,
                       hashCache = hash
                     }
-                    withUpdatedPreviousBlock = setNextBlock block newBlock model.discoveredBlocks
+                    newBlockIndex = length model.discoveredBlocks
+                    withUpdatedPreviousBlock = setNextBlock block newBlockIndex model.discoveredBlocks
                   in
                     { model |
                       discoveredBlocks = newBlock :: withUpdatedPreviousBlock,
@@ -110,8 +111,8 @@ refillTransactionPool model =
     else
       model
 
-setNextBlock : BlockLink -> BlockLink -> List BlockLink -> List BlockLink
-setNextBlock oldBlock newBlock allBlocks =
+setNextBlock : BlockLink -> Int -> List BlockLink -> List BlockLink
+setNextBlock oldBlock newBlockIndex allBlocks =
   allBlocks
     |> map (\blocklink ->
         case blocklink of
@@ -119,7 +120,7 @@ setNextBlock oldBlock newBlock allBlocks =
             blocklink
           BlockLink block ->
             if blockHash block == blockLinkHash oldBlock
-              then BlockLink { block | nextBlocks = newBlock :: block.nextBlocks }
+              then BlockLink { block | nextBlocks = newBlockIndex :: block.nextBlocks }
             else
               BlockLink block
       )

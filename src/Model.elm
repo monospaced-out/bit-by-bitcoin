@@ -27,7 +27,7 @@ type alias Miner = { blockToErase : BlockLink }
 type alias Block = {
   transaction : Transaction,
   previousBlock : BlockLink,
-  nextBlocks : List BlockLink,
+  nextBlocks : List Int,
   nonce : String,
   hashCache : String
 }

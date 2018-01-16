@@ -1,6 +1,6 @@
 module Update exposing (..)
 
-import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress)
+import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain)
 import Random
 import List exposing (head, indexedMap, filter, drop, length, append, map)
 import String exposing (slice, toInt)
@@ -12,7 +12,7 @@ update msg model =
   case msg of
     Next ->
       (
-        model |> mine |> refillTransactionPool,
+        model |> mine |> refillTransactionPool |> updateMiners,
         Random.generate RandomEvent (Random.int 1 100000)
       )
     PostTx ->
@@ -113,6 +113,21 @@ refillTransactionPool model =
       }
     else
       model
+
+updateMiners : Model -> Model
+updateMiners model =
+  { model | miners =
+    model.miners
+      |> map (\miner ->
+          let blockToErase =
+            if isBlockInChain miner.blockToErase (longestChain model.discoveredBlocks)
+              then miner.blockToErase
+            else
+              NoBlock
+          in
+            { miner | blockToErase = blockToErase }
+        )
+  }
 
 setNextBlock : BlockLink -> Int -> List BlockLink -> List BlockLink
 setNextBlock oldBlock newBlockIndex allBlocks =

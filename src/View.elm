@@ -7,7 +7,7 @@ import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputT
 import Settings exposing (confirmationsRequired, numMainAddresses)
 import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length)
 import String exposing (slice)
-import Array exposing (Array, fromList, get)
+import Array exposing (Array, fromList, toList, get)
 import Json.Decode as Json
 
 -- https://github.com/tbasse/elm-spinner/commit/f96315660354612db67bea37983dab840d389859
@@ -47,17 +47,14 @@ view model = div []
       |> div [],
     h2 [] [ text "Blockchain" ],
     div [ class "tree" ] [
-      div [ class "node" ] [
-        div [] [ text "origin" ],
-        let
-          blocksArray = fromList (reverse model.discoveredBlocks)
-        in
-          case get 1 blocksArray of
-            Nothing ->
-              span [] []
-            Just nextBlock ->
-              div [ class "leaves-container" ] [ buildBlockTree blocksArray nextBlock ]
-      ]
+      let
+        blocksInOrder = fromList (reverse model.discoveredBlocks)
+      in
+        case get 0 blocksInOrder of
+          Nothing ->
+            span [] []
+          Just nextBlock ->
+            div [ class "leaves-container" ] [ buildBlockTree blocksInOrder nextBlock ]
     ],
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
@@ -117,23 +114,40 @@ view model = div []
 
 buildBlockTree : Array BlockLink -> BlockLink -> Html msg
 buildBlockTree allBlocks blocklink =
-  case blocklink of
-    NoBlock ->
-      text "well fuck I shouldn't be here"
-    BlockLink block ->
-      div [ class "node" ] [
-        div [] [ text (hashDisplay (blockHash block)) ],
-        div [ class "leaves-container" ] (
-          block.nextBlocks
-            |> map (\blockIndex ->
-                case get blockIndex allBlocks of
-                  Nothing ->
-                    span [] []
-                  Just blockAtIndex ->
-                    buildBlockTree allBlocks blockAtIndex
-              )
-        )
-      ]
+  div [ class "node" ] (
+    case blocklink of
+      NoBlock ->
+         [
+          div [] [ text (hashDisplay (blockLinkHash NoBlock)) ],
+          div [ class "leaves-container" ] (
+            allBlocks
+              |> toList
+              |> filter (\blocklink ->
+                  case blocklink of
+                    NoBlock -> False
+                    BlockLink block ->
+                      case block.previousBlock of
+                        NoBlock -> True
+                        BlockLink block -> False
+                )
+              |> map ( \blocklink -> buildBlockTree allBlocks blocklink )
+          )
+        ]
+      BlockLink block ->
+        [
+          div [] [ text (hashDisplay (blockHash block)) ],
+          div [ class "leaves-container" ] (
+            block.nextBlocks
+              |> map (\blockIndex ->
+                  case get blockIndex allBlocks of
+                    Nothing ->
+                      span [] []
+                    Just blockAtIndex ->
+                      buildBlockTree allBlocks blockAtIndex
+                )
+          )
+        ]
+  )
 
 minerDisplay : Miner -> String
 minerDisplay miner =

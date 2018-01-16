@@ -19,5 +19,5 @@ img {
 }
 
 .leaves-container {
-  display: table-row;
+  display: inline-block;
 }

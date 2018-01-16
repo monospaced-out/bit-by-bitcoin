@@ -28,6 +28,7 @@ view model = div []
             minerActionDisplay model m |> text,
             select [ onChange (\s -> SelectEraseBlock s m) ] (
               model.discoveredBlocks
+                |> longestChain
                 |> filter ( \blocklink ->
                     case blocklink of
                       NoBlock ->

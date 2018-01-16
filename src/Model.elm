@@ -3,7 +3,7 @@ module Model exposing (..)
 import Sha256 exposing (sha256)
 import Html.Attributes exposing (style, type_, value)
 import String exposing (slice)
-import List exposing (head, filter, drop, map, length, sortWith, foldr, tail, member)
+import List exposing (head, filter, drop, map, length, sortWith, foldr, tail)
 import Tuple exposing (first, second)
 import Array exposing (fromList, get)
 import Settings exposing (confirmationsRequired)
@@ -188,6 +188,13 @@ nextTx blockchain transactionPool =
           Just remainingTransactions ->
             nextTx blockchain remainingTransactions
 
+isBlockInChain : BlockLink -> List BlockLink -> Bool
+isBlockInChain target chain =
+  chain
+    |> foldr (\blocklink hasBeenFound ->
+        (blockLinkHash blocklink == blockLinkHash target) || hasBeenFound
+      ) False
+
 maliciousBlockToMine : List BlockLink -> Miner -> BlockLink
 maliciousBlockToMine blocklinks miner =
   case miner.blockToErase of
@@ -199,7 +206,7 @@ maliciousBlockToMine blocklinks miner =
         chains = blocklinks
           |> filter ( \blocklink -> isTip blocklink)
           |> map ( \blocklink -> chainForBlock blocklink )
-          |> filter ( \chain -> (member startBlock chain) && not (member miner.blockToErase chain) )
+          |> filter ( \chain -> (isBlockInChain startBlock chain) && not (isBlockInChain miner.blockToErase chain) )
           |> map ( \chain -> (chain, distanceToBlock chain startBlock) )
           |> sortWith ( \(chain1, distance1) (chain2, distance2) ->
               case compare distance1 distance2 of

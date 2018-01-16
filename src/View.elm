@@ -26,7 +26,7 @@ view model = div []
           div [ minerStyle model m ] [
             "• " ++ minerDisplay miner |> text,
             minerActionDisplay model m |> text,
-            select [ onChange (\s -> SelectEraseBlock s m) ] (
+            select [ onChange (\s -> SelectEraseBlock s m), value (blockLinkHash miner.blockToErase) ] (
               model.discoveredBlocks
                 |> longestChain
                 |> filter ( \blocklink ->
@@ -40,7 +40,7 @@ view model = div []
                 |> map ( \blocklink ->
                     option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
                   )
-                |> append [ option [] [ text "Block to erase" ] ]
+                |> append [ option [ value (blockLinkHash NoBlock) ] [ text "Block to erase" ] ]
             ),
             br [] []
           ]

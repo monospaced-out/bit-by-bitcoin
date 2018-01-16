@@ -1,7 +1,6 @@
 module Model exposing (..)
 
 import Sha256 exposing (sha256)
-import Html.Attributes exposing (style, type_, value)
 import String exposing (slice)
 import List exposing (head, filter, drop, map, length, sortWith, foldr, tail)
 import Tuple exposing (first, second)

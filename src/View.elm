@@ -35,6 +35,7 @@ view model = div []
                       BlockLink block ->
                         True
                   )
+                |> reverse
                 |> map ( \blocklink ->
                     option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
                   )
@@ -114,7 +115,7 @@ view model = div []
     ]
   ]
 
-buildBlockTree : Array BlockLink -> BlockLink -> Html.Html msg
+buildBlockTree : Array BlockLink -> BlockLink -> Html msg
 buildBlockTree allBlocks blocklink =
   case blocklink of
     NoBlock ->

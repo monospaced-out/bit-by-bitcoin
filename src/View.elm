@@ -1,12 +1,13 @@
 module View exposing (..)
 
-import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option)
-import Html.Attributes exposing (style, type_, value)
+import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span)
+import Html.Attributes exposing (style, type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, nextTx, nonceFor, isValidTx)
 import Settings exposing (confirmationsRequired, numMainAddresses)
-import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head)
+import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length)
 import String exposing (slice)
+import Array exposing (Array, fromList, get)
 import Json.Decode as Json
 
 -- https://github.com/tbasse/elm-spinner/commit/f96315660354612db67bea37983dab840d389859
@@ -43,6 +44,20 @@ view model = div []
           ]
         )
       |> div [],
+    h2 [] [ text "Blockchain" ],
+    div [ class "tree" ] [
+      div [ class "node" ] [
+        div [] [ text "origin" ],
+        let
+          blocksArray = fromList (reverse model.discoveredBlocks)
+        in
+          case get 1 blocksArray of
+            Nothing ->
+              span [] []
+            Just nextBlock ->
+              div [ class "childrenContainer" ] [ buildBlockTree blocksArray nextBlock ]
+      ]
+    ],
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
       |> indexedMap ( \b blocklink -> [
@@ -98,6 +113,26 @@ view model = div []
       input [ type_ "submit" ] []
     ]
   ]
+
+buildBlockTree : Array BlockLink -> BlockLink -> Html.Html msg
+buildBlockTree allBlocks blocklink =
+  case blocklink of
+    NoBlock ->
+      text "well fuck I shouldn't be here"
+    BlockLink block ->
+      div [ class "node" ] [
+        div [] [ text (hashDisplay (blockHash block)) ],
+        div [ class "childrenContainer" ] (
+          block.nextBlocks
+            |> map (\blockIndex ->
+                case get blockIndex allBlocks of
+                  Nothing ->
+                    div [] []
+                  Just blockAtIndex ->
+                    buildBlockTree allBlocks blockAtIndex
+              )
+        )
+      ]
 
 minerDisplay : Miner -> String
 minerDisplay miner =

@@ -13,3 +13,7 @@ img {
   margin: 20px 0;
   max-width: 200px;
 }
+
+.node {
+  border: 1px solid grey;
+}

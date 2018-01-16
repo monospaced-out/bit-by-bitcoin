@@ -194,36 +194,32 @@ isBlockInChain target chain =
         (blockLinkHash blocklink == blockLinkHash target) || hasBeenFound
       ) False
 
-maliciousBlockToMine : List BlockLink -> Miner -> BlockLink
-maliciousBlockToMine blocklinks miner =
-  case miner.blockToErase of
-    NoBlock ->
-      NoBlock
-    BlockLink blockToErase ->
-      let
-        startBlock = blockToErase.previousBlock
-        chains = blocklinks
-          |> filter ( \blocklink -> isTip blocklink)
-          |> map ( \blocklink -> chainForBlock blocklink )
-          |> filter ( \chain -> (isBlockInChain startBlock chain) && not (isBlockInChain miner.blockToErase chain) )
-          |> map ( \chain -> (chain, distanceToBlock chain startBlock) )
-          |> sortWith ( \(chain1, distance1) (chain2, distance2) ->
-              case compare distance1 distance2 of
-                LT -> GT
-                EQ -> EQ
-                GT -> LT
-            )
-        longestChain = get 0 (fromList chains)
-      in
-        case longestChain of
+maliciousBlockToMine : List BlockLink -> Block -> BlockLink
+maliciousBlockToMine blocklinks blockToErase =
+  let
+    startBlock = blockToErase.previousBlock
+    chains = blocklinks
+      |> filter ( \blocklink -> isTip blocklink)
+      |> map ( \blocklink -> chainForBlock blocklink )
+      |> filter ( \chain -> (isBlockInChain startBlock chain) && not (isBlockInChain (BlockLink blockToErase) chain) )
+      |> map ( \chain -> (chain, distanceToBlock chain startBlock) )
+      |> sortWith ( \(chain1, distance1) (chain2, distance2) ->
+          case compare distance1 distance2 of
+            LT -> GT
+            EQ -> EQ
+            GT -> LT
+        )
+    longestChain = get 0 (fromList chains)
+  in
+    case longestChain of
+      Nothing ->
+        startBlock
+      Just chain ->
+        case head (first chain) of
           Nothing ->
-            startBlock
-          Just chain ->
-            case head (first chain) of
-              Nothing ->
-                NoBlock
-              Just blocklink ->
-                blocklink
+            NoBlock
+          Just blocklink ->
+            blocklink
 
 distanceToBlock : List BlockLink -> BlockLink -> Int
 distanceToBlock blocklinks target =

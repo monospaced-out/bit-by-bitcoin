@@ -46,9 +46,12 @@ mine model =
               results = model.miners
                 |> indexedMap ( \m miner ->
                     let blockToMine =
-                      case (maliciousBlockToMine model.discoveredBlocks miner) of
+                      case miner.blockToErase of
                         NoBlock -> longestChainBlock
-                        BlockLink block -> BlockLink block
+                        BlockLink blockToErase ->
+                          case (maliciousBlockToMine model.discoveredBlocks blockToErase) of
+                            NoBlock -> NoBlock
+                            BlockLink block -> BlockLink block
                     in
                       (
                         (nonceFor m model.randomValue),

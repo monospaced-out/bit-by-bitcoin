@@ -15,5 +15,9 @@ img {
 }
 
 .node {
-  border: 1px solid grey;
+  display: table-cell;
+}
+
+.leaves-container {
+  display: table-row;
 }

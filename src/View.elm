@@ -55,7 +55,7 @@ view model = div []
             Nothing ->
               span [] []
             Just nextBlock ->
-              div [ class "childrenContainer" ] [ buildBlockTree blocksArray nextBlock ]
+              div [ class "leaves-container" ] [ buildBlockTree blocksArray nextBlock ]
       ]
     ],
     h2 [] [ text "Mined Blocks" ],
@@ -122,12 +122,12 @@ buildBlockTree allBlocks blocklink =
     BlockLink block ->
       div [ class "node" ] [
         div [] [ text (hashDisplay (blockHash block)) ],
-        div [ class "childrenContainer" ] (
+        div [ class "leaves-container" ] (
           block.nextBlocks
             |> map (\blockIndex ->
                 case get blockIndex allBlocks of
                   Nothing ->
-                    div [] []
+                    span [] []
                   Just blockAtIndex ->
                     buildBlockTree allBlocks blockAtIndex
               )

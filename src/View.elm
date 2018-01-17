@@ -176,10 +176,16 @@ htmlBlock blockLink =
 
 htmlBlockChildren : List BlockLink -> List BlockLink -> Html msg
 htmlBlockChildren allBlockLinks childrenBlockLinks =
-  div [ class "leaves-container" ] (
-    childrenBlockLinks
-      |> map (\childBlockLink -> buildBlockTree allBlockLinks childBlockLink )
-  )
+  let
+    leavesContainerClass =
+      if length childrenBlockLinks > 1
+        then "leaves-container multiple-leaves"
+        else "leaves-container"
+  in
+    div [ class leavesContainerClass ] (
+      childrenBlockLinks
+        |> map (\childBlockLink -> buildBlockTree allBlockLinks childBlockLink )
+    )
 
 minerDisplay : Miner -> String
 minerDisplay miner =

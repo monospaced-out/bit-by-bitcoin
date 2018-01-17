@@ -19,7 +19,9 @@ view : Model -> Html Msg
 view model = div [ class "container" ]
   [
     div [ class "left-pane" ] [ oldView model ],
-    div [ class  "center-pane" ] [],
+    div [ class  "center-pane" ] [
+      blockChain model.discoveredBlocks
+    ],
     div [ class "right-pane" ] []
   ]
 

@@ -47,16 +47,7 @@ view model = div []
         )
       |> div [],
     h2 [] [ text "Blockchain" ],
-    div [ class "tree" ] [
-      let
-        blocksInOrder = reverse model.discoveredBlocks
-      in
-        case head blocksInOrder of
-          Nothing ->
-            span [] []
-          Just nextBlock ->
-            div [ class "leaves-container" ] [ buildBlockTree blocksInOrder nextBlock ]
-    ],
+    blockChain model.discoveredBlocks,
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
       |> indexedMap ( \b blocklink -> [

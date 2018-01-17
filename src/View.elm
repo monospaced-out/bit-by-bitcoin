@@ -49,9 +49,9 @@ view model = div []
     h2 [] [ text "Blockchain" ],
     div [ class "tree" ] [
       let
-        blocksInOrder = fromList (reverse model.discoveredBlocks)
+        blocksInOrder = reverse model.discoveredBlocks
       in
-        case get 0 blocksInOrder of
+        case head blocksInOrder of
           Nothing ->
             span [] []
           Just nextBlock ->

@@ -16,7 +16,15 @@ onChange handler =
     on "change" <| Json.map handler <| Json.at ["target", "value"] Json.string
 
 view : Model -> Html Msg
-view model = div []
+view model = div [ class "container" ]
+  [
+    div [ class "left-pane" ] [ oldView model ],
+    div [ class  "center-pane" ] [],
+    div [ class "right-pane" ] []
+  ]
+
+oldView : Model -> Html Msg
+oldView model = div []
   [
     h1 [] [ text "bit by bitcoin" ],
     button [ onClick Next ] [ text "Next" ],

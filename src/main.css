@@ -13,6 +13,19 @@ h1 {
   display: table-cell;
 }
 
+.block {
+  padding: 5px;
+  border: 1px solid #aaa;
+  margin: 2px;
+  display: inline-block;
+}
+
 .leaves-container {
   display: inline-block;
+}
+
+.leaves-container.multiple-leaves {
+  border-top: 1px solid #aaa;
+  padding-top: 2px;
+  margin-top: 2px;
 }

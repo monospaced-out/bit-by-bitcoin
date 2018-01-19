@@ -239,7 +239,7 @@ txDisplay tx =
     toString tx.amount ++ "BTC}"
 
 hashDisplay : String -> String
-hashDisplay hash = slice 0 10 hash ++ "..."
+hashDisplay hash = slice 0 7 hash
 
 minerStyle : Model -> Int -> Attribute msg
 minerStyle model minerIndex =

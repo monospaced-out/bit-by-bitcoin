@@ -47,16 +47,7 @@ view model = div []
         )
       |> div [],
     h2 [] [ text "Blockchain" ],
-    div [ class "tree" ] [
-      let
-        blocksInOrder = fromList (reverse model.discoveredBlocks)
-      in
-        case get 0 blocksInOrder of
-          Nothing ->
-            span [] []
-          Just nextBlock ->
-            div [ class "leaves-container" ] [ buildBlockTree blocksInOrder nextBlock ]
-    ],
+    blockChain model.discoveredBlocks,
     h2 [] [ text "Mined Blocks" ],
     model.discoveredBlocks
       |> indexedMap ( \b blocklink -> [
@@ -113,42 +104,79 @@ view model = div []
     ]
   ]
 
-buildBlockTree : Array BlockLink -> BlockLink -> Html msg
-buildBlockTree allBlocks blocklink =
+blockChain : List BlockLink -> Html msg
+blockChain blockLinks =
+  div [ class "tree" ] [
+    let
+      blocksInOrder = reverse blockLinks
+    in
+      case head blocksInOrder of
+        Nothing ->
+          span [] []
+        Just nextBlock ->
+          div [ class "leaves-container" ] [ buildBlockTree blocksInOrder nextBlock ]
+  ]
+
+buildBlockTree : List BlockLink -> BlockLink -> Html msg
+buildBlockTree allBlockLinks blockLink =
   div [ class "node" ] (
-    case blocklink of
+    case blockLink of
       NoBlock ->
-         [
-          div [] [ text (hashDisplay (blockLinkHash NoBlock)) ],
-          div [ class "leaves-container" ] (
-            allBlocks
-              |> toList
-              |> filter (\blocklink ->
-                  case blocklink of
-                    NoBlock -> False
-                    BlockLink block ->
-                      case block.previousBlock of
-                        NoBlock -> True
-                        BlockLink block -> False
-                )
-              |> map ( \blocklink -> buildBlockTree allBlocks blocklink )
-          )
+        [
+          htmlBlock NoBlock,
+          allBlockLinks
+            |> childrenForOriginBlock
+            |> htmlBlockChildren allBlockLinks
         ]
       BlockLink block ->
         [
-          div [] [ text (hashDisplay (blockHash block)) ],
-          div [ class "leaves-container" ] (
-            block.nextBlocks
-              |> map (\blockIndex ->
-                  case get blockIndex allBlocks of
-                    Nothing ->
-                      span [] []
-                    Just blockAtIndex ->
-                      buildBlockTree allBlocks blockAtIndex
-                )
-          )
+          htmlBlock (BlockLink block),
+          block.nextBlocks
+            |> map (\blockLinkIndex ->
+                getBlockLink blockLinkIndex allBlockLinks
+              )
+            |> htmlBlockChildren allBlockLinks
         ]
   )
+
+childrenForOriginBlock : List BlockLink -> List BlockLink
+childrenForOriginBlock allBlockLinks =
+  allBlockLinks
+    |> filter (\bl ->
+        case bl of
+          NoBlock -> False
+          BlockLink block ->
+            case block.previousBlock of
+              NoBlock -> True
+              BlockLink block -> False
+      )
+
+getBlockLink : Int -> List BlockLink -> BlockLink
+getBlockLink index blockLinks =
+  case get index (fromList blockLinks) of
+    Nothing ->
+      NoBlock
+    Just blockLinkAtIndex ->
+      blockLinkAtIndex
+
+htmlBlock : BlockLink -> Html msg
+htmlBlock blockLink =
+  div [ class "block-container" ] [
+    div [ class "block" ] [ text (hashDisplay (blockLinkHash blockLink)) ]
+  ]
+
+htmlBlockChildren : List BlockLink -> List BlockLink -> Html msg
+htmlBlockChildren allBlockLinks childrenBlockLinks =
+  let
+    leavesContainerClass =
+      if length childrenBlockLinks > 1
+        then "leaves-container multiple-leaves"
+        else "leaves-container"
+  in
+    div [ class leavesContainerClass ] (
+      childrenBlockLinks
+        |> map (\childBlockLink -> buildBlockTree allBlockLinks childBlockLink )
+    )
 
 minerDisplay : Miner -> String
 minerDisplay miner =

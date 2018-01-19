@@ -12,6 +12,10 @@ h1 {
   font-size: 30px;
 }
 
+.tree {
+  overflow: scroll;
+}
+
 .node {
   display: table-cell;
 }
@@ -52,8 +56,8 @@ h1 {
 .leaves-container.multiple-leaves::after {
   position: absolute;
   top: -1px;
-  left: 58px;
-  width: calc(100% - 115px);
+  left: 0;
+  width: 100%;
   height: 1px;
   background: #aaa;
   content: "";
@@ -65,15 +69,26 @@ h1 {
 
 .left-pane {
   width: 25%;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.left-pane-content {
+  padding: 20px 10px;
 }
 
 .center-pane {
-  width: 37.5%;
-  align-items: center;
-  justify-content: center;
   display: flex;
+  width: 37.5%;
+  flex-shrink: 0;
+  flex-basis: auto;
   height: 100vh;
-  overflow-y: scroll;
+  overflow: scroll;
+}
+
+.center-pane-content {
+  padding: 20px 10px;
+  margin: auto;
 }
 
 .right-pane {

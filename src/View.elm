@@ -174,9 +174,15 @@ htmlTransactionPool model =
   model.transactionPool
     |> reverse
     |> map ( \tx ->
-        div [ txStyle (longestChain model.discoveredBlocks) tx ] [
-          text (txDisplay tx),
-          br [] []
+        div [ class "transaction", txStyle (longestChain model.discoveredBlocks) tx ] [
+          i [ class "fas fa-exchange-alt" ] [],
+          hashDisplay (txHash tx) ++ " | " |> text,
+          i [ class "fas fa-address-card" ] [],
+          hashDisplay tx.sender.hash |> text,
+          i [ class "fas fa-arrow-right" ] [],
+          i [ class "fas fa-address-card" ] [],
+          hashDisplay tx.receiver.hash ++ " | " ++ toString tx.amount |> text,
+          i [ class "fab fa-bitcoin" ] []
         ]
       )
     |> div []

@@ -11,3 +11,6 @@ confirmationsRequired = 6
 
 transactionPoolSize : Int
 transactionPoolSize = 4
+
+numMiners : Int
+numMiners = 6

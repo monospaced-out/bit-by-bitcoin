@@ -3,7 +3,7 @@ module View exposing (..)
 import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span)
 import Html.Attributes exposing (style, type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
-import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks)
+import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine)
 import Settings exposing (confirmationsRequired, numMainAddresses)
 import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length)
 import String exposing (slice)
@@ -185,7 +185,7 @@ htmlMiners : Model -> Html Msg
 htmlMiners model =
   model.miners
     |> indexedMap ( \m miner ->
-        div [ minerStyle model m ] [
+        div [ minerStyle model m miner ] [
           htmlMiner model m miner
         ]
       )
@@ -195,61 +195,58 @@ htmlMiner : Model -> Int -> Miner -> Html Msg
 htmlMiner model minerIndex miner =
   let
     maybeNextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
-    maybePreviousBlock = head (longestChain model.discoveredBlocks)
+    previousBlock = blockToMine model miner
   in
     case maybeNextTransaction of
       Nothing -> "" |> text
       Just nextTransaction ->
-        case maybePreviousBlock of
-          Nothing -> "" |> text
-          Just previousBlock ->
-            div [ class "miner" ] [
-              div [ class "miner-body" ] [
-                div [ class "miner-input" ] [
-                  div [ class "miner-input-row" ] [
-                    div [ class "miner-input-label" ] [
-                      "nonce:" |> text
-                    ],
-                    div [] [
-                      nonceFor minerIndex model.randomValue |> text
-                    ]
-                  ],
-                  div [ class "miner-input-row" ] [
-                    div [ class "miner-input-label" ] [
-                      "transaction:" |> text
-                    ],
-                    div [] [
-                      txHash nextTransaction |> hashDisplay |> text
-                    ]
-                  ],
-                  div [ class "miner-input-row" ] [
-                    div [ class "miner-input-label" ] [
-                      "prev block:" |> text
-                    ],
-                    div [] [
-                      blockLinkHash previousBlock |> hashDisplay |> text
-                    ]
-                  ]
+        div [ class "miner" ] [
+          div [ class "miner-body" ] [
+            div [ class "miner-input" ] [
+              div [ class "miner-input-row" ] [
+                div [ class "miner-input-label" ] [
+                  "nonce:" |> text
                 ],
-                div [ class "miner-encryption" ] [
-                  text "->"
-                ],
-                div [ class "miner-output" ] [
-                  testBlockHash nextTransaction previousBlock minerIndex model.randomValue
-                    |> hashDisplay
-                    |> text
+                div [] [
+                  nonceFor minerIndex model.randomValue |> text
                 ]
               ],
-              select [ onChange (\s -> SelectEraseBlock s minerIndex), value (blockLinkHash miner.blockToErase) ] (
-                model.discoveredBlocks
-                  |> erasableBlocks
-                  |> reverse
-                  |> map ( \blocklink ->
-                      option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
-                    )
-                  |> append [ option [ value (blockLinkHash NoBlock) ] [ text "Block to erase" ] ]
-              )
+              div [ class "miner-input-row" ] [
+                div [ class "miner-input-label" ] [
+                  "transaction:" |> text
+                ],
+                div [] [
+                  txHash nextTransaction |> hashDisplay |> text
+                ]
+              ],
+              div [ class "miner-input-row" ] [
+                div [ class "miner-input-label" ] [
+                  "prev block:" |> text
+                ],
+                div [] [
+                  blockLinkHash previousBlock |> hashDisplay |> text
+                ]
+              ]
+            ],
+            div [ class "miner-encryption" ] [
+              text "->"
+            ],
+            div [ class "miner-output" ] [
+              testBlockHash nextTransaction previousBlock minerIndex model.randomValue
+                |> hashDisplay
+                |> text
             ]
+          ],
+          select [ onChange (\s -> SelectEraseBlock s minerIndex), value (blockLinkHash miner.blockToErase) ] (
+            model.discoveredBlocks
+              |> erasableBlocks
+              |> reverse
+              |> map ( \blocklink ->
+                  option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
+                )
+              |> append [ option [ value (blockLinkHash NoBlock) ] [ text "Block to erase" ] ]
+          )
+        ]
 
 minerDisplay : Miner -> String
 minerDisplay miner =
@@ -298,22 +295,19 @@ txDisplay tx =
 hashDisplay : String -> String
 hashDisplay hash = slice 0 7 hash
 
-minerStyle : Model -> Int -> Attribute msg
-minerStyle model minerIndex =
+minerStyle : Model -> Int -> Miner -> Attribute msg
+minerStyle model minerIndex miner =
   let
+    previousBlock = blockToMine model miner
     nextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
   in
     case nextTransaction of
       Nothing ->
         style []
       Just transaction ->
-        case head <| model.discoveredBlocks of
-          Nothing ->
-            style []
-          Just block ->
-            if (slice 0 2 (testBlockHash transaction block minerIndex model.randomValue)) == "00"
-              then style [ ("backgroundColor", "green") , ("color", "white") ]
-              else style []
+        if (slice 0 2 (testBlockHash transaction previousBlock minerIndex model.randomValue)) == "00"
+          then style [ ("backgroundColor", "green") , ("color", "white") ]
+          else style []
 
 txStyle : List BlockLink -> Transaction -> Attribute msg
 txStyle blockchain transaction =

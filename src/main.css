@@ -12,6 +12,10 @@ h1 {
   font-size: 30px;
 }
 
+a, a:visited {
+  color: #FFB300;
+}
+
 .tree {
   overflow: scroll;
 }

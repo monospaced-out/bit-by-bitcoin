@@ -1,7 +1,7 @@
 module View exposing (..)
 
-import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i)
-import Html.Attributes exposing (type_, value, class)
+import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i, p, a)
+import Html.Attributes exposing (type_, value, class, href)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash, isBlockInChain)
 import Settings exposing (confirmationsRequired, numMainAddresses)
@@ -20,8 +20,54 @@ view model = div [ class "container" ]
   [
     div [ class "left-pane" ] [
       div [ class "left-pane-content" ] [
-        h1 [] [ text "bit by bitcoin" ],
-        button [ onClick Next ] [ text "Next" ]
+        h1 [] [
+          text "Bit by Bitcoin"
+        ],
+        p [] [
+          "Bit by Bitcoin is an interactive tool for understanding how Bitcoin and the Blockchain work. " ++
+          "Note that this is a work in progress, and is an intentional oversimplification of the process. " ++
+          "That said if you find any major flaws, please don't hesitate to "
+          |> text,
+          a [ href "https://github.com/tyleryasaka/bit-by-bitcoin/pulls" ] [
+            "let me know" |> text
+          ],
+          "!" |> text,
+          p [] [
+            "This tool lets you simulate the progression of time, at your own pace. Each time you click \"next\", the clock ticks forward."
+            |> text
+          ],
+          button [ onClick Next ] [ text "Next" ],
+          p [] [
+            "You can further interact by sending Bitcoins from one address to another. " ++
+            "Once you create a transaction, it will go into the transaction pool. " ++
+            "The miners work on transactions in the pool one at a time. When they have \"mined\" a transaction, it goes onto the blockchain! " ++
+            "However, the transaction is generally not considered valid until 6 blocks have been mined after it. " ++
+            "This provides confidence that the transaction will not be overridden. "
+            |> text
+          ],
+          p [] [
+            "Mining is simply the process of writing a block onto the blockchain. " ++
+            "A block must contain certain information, including the previous block, the transactions it contains, and a special string called a \"nonce\". " ++
+            "The nonce exists because of one more requirement: the block must create a one-way hash based on all of this info. " ++
+            "The hash is required to start with a certain number of 0's (in our example, just one). " ++
+            "A one-way hash will always produce the same output for a given set of inputs. " ++
+            "Therefore, to get a hash that begins with the required number of 0's, the miners have to try different nonces until they find one that works. " ++
+            "Once a miner finds a nonce that works, they broadcast the information to the rest of the network. A block has been mined!"
+            |> text
+          ],
+          p [] [
+            "Because mining is computationally difficult, it adds a layer of security to the blockchain. " ++
+            "The rule of the blockchain is that the longest sequence of blocks is considered valid. All other blocks are ignored. " ++
+            "If we assume that at least 51% of the computing power in the network is run by good guys, then we can be confident that the longest chain is the valid chain. " ++
+            "This is the assumption of Bitcoin and proof-of-work based cryptocurrencies. " ++
+            "However, if a malicious entity were to gain control of 51% or more of the computing power in the network, they could theoretically rewrite transactions on the blockchain. " ++
+            "You can see this for yourself by selecting a \"block to erase\" for the miners on the right side of this screen. " ++
+            "If you select the same block for more than half of the miners, you will see a new branch form in the block tree. " ++
+            "Depending on which block you chose and how lucky you are, within some number of clock ticks you should see your new branch overtake the main one. " ++
+            "When this happens, the blockchain history will be rewritten. Any transactions that were in the old branch will disappear, as if they never happened."
+            |> text
+          ]
+        ]
       ]
     ],
     div [ class  "center-pane" ] [

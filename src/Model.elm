@@ -270,3 +270,7 @@ blockToMine model miner =
           case (maliciousBlockToMine model.discoveredBlocks blockToErase) of
             NoBlock -> NoBlock
             BlockLink block -> BlockLink block
+
+isValidHash : String -> Bool
+isValidHash hash =
+  slice 0 2 hash == "00"

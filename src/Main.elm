@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Settings exposing (numMainAddresses, lastMainAddressIndex)
+import Settings exposing (numMainAddresses, lastMainAddressIndex, numMiners)
 import Model exposing (Model, Msg(RandomEvent), BlockLink(NoBlock), newMiner, newTx, newAddress)
 import Update exposing (update)
 import View exposing (view)
@@ -12,7 +12,7 @@ init : ( Model, Cmd Msg )
 init =
   (
     {
-      miners = range 0 9
+      miners = range 0 (numMiners - 1)
         |> map (\n -> newMiner NoBlock),
       discoveredBlocks = [ NoBlock ],
       transactionPool = range 0 3

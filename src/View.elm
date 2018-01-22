@@ -20,7 +20,8 @@ view model = div [ class "container" ]
   [
     div [ class "left-pane" ] [
       div [ class "left-pane-content" ] [
-        oldView model
+        h1 [] [ text "bit by bitcoin" ],
+        button [ onClick Next ] [ text "Next" ]
       ]
     ],
     div [ class  "center-pane" ] [
@@ -42,95 +43,6 @@ view model = div [ class "container" ]
         h2 [] [ text "Miners" ],
         htmlMiners model
       ]
-    ]
-  ]
-
-oldView : Model -> Html Msg
-oldView model = div []
-  [
-    h1 [] [ text "bit by bitcoin" ],
-    button [ onClick Next ] [ text "Next" ],
-    h2 [] [ text "Miners" ],
-    model.miners
-      |> indexedMap ( \m miner ->
-          div [ minerStyle model m ] [
-            "• " ++ minerDisplay miner |> text,
-            minerActionDisplay model m |> text,
-            select [ onChange (\s -> SelectEraseBlock s m), value (blockLinkHash miner.blockToErase) ] (
-              model.discoveredBlocks
-                |> longestChain
-                |> filter ( \blocklink ->
-                    case blocklink of
-                      NoBlock ->
-                        False
-                      BlockLink block ->
-                        True
-                  )
-                |> reverse
-                |> map ( \blocklink ->
-                    option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
-                  )
-                |> append [ option [ value (blockLinkHash NoBlock) ] [ text "Block to erase" ] ]
-            ),
-            br [] []
-          ]
-        )
-      |> div [],
-    h2 [] [ text "Blockchain" ],
-    blockChain model.discoveredBlocks,
-    h2 [] [ text "Mined Blocks" ],
-    model.discoveredBlocks
-      |> indexedMap ( \b blocklink -> [
-          if b == confirmationsRequired
-            then h3 [] [ text "Confirmed" ]
-          else if b == 0
-            then h3 [] [ text "Unconfirmed" ]
-          else
-            text "",
-          text ("• " ++ blockDisplay blocklink),
-          br [] []
-        ] )
-      |> concat
-      |> div [],
-    h2 [] [ text "Transaction Pool" ],
-    model.transactionPool
-      |> map ( \tx ->
-          div [ txStyle (longestChain model.discoveredBlocks) tx ] [
-            text ("• " ++ txDisplay tx),
-            br [] []
-          ]
-        )
-      |> div [],
-    h2 [] [ text "Joe Schmo's Neighborhood" ],
-    take numMainAddresses model.addressBook
-      |> withUpdatedBalances (longestChain model.discoveredBlocks)
-      |> concatMap ( \address -> [
-          text ("• " ++ hashDisplay address.hash ++ " " ++ toString address.balance ++ " BTC"),
-          br [] []
-        ] )
-      |> div [],
-    h2 [] [ text "Send Transaction" ],
-    form [ onSubmit PostTx ] [
-      text("From: "),
-      select [ onChange InputTxSender ] (
-        take numMainAddresses model.addressBook
-          |> map ( \address ->
-              option [ value address.hash ] [ text (hashDisplay address.hash) ]
-            )
-      ),
-      br [] [],
-      text("To: "),
-      select [ onChange InputTxReceiver ] (
-        take numMainAddresses model.addressBook
-          |> map ( \address ->
-              option [ value address.hash ] [ text (hashDisplay address.hash) ]
-            )
-      ),
-      br [] [],
-      text("Amount: "),
-      input [ onInput InputTxAmount, type_ "number", Html.Attributes.min "0" ] [],
-      br [] [],
-      input [ type_ "submit" ] []
     ]
   ]
 

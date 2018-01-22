@@ -180,8 +180,9 @@ isValidTx blockchain transaction =
   let
     senderHasFunds = (balanceFor blockchain transaction.sender) >= transaction.amount
     senderIsNotReceiver = transaction.sender /= transaction.receiver
+    amountIsPositive = transaction.amount > 0
   in
-    senderHasFunds && senderIsNotReceiver
+    senderHasFunds && senderIsNotReceiver && amountIsPositive
 
 nextTx : List BlockLink -> List Transaction -> Maybe Transaction
 nextTx blockchain transactionPool =

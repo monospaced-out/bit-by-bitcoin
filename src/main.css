@@ -103,3 +103,36 @@ h1 {
   flex-grow: 1;
   text-align: left;
 }
+
+.miners {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.miner {
+  display: flex;
+  align-items: center;
+  margin: 10px 20px;
+}
+
+.miner-input {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  border-top: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+}
+
+.miner-input-row {
+  border-bottom: 1px solid #aaa;
+  display: flex;
+  align-items: center;
+}
+
+.miner-input-label {
+  flex-grow: 1;
+  margin-right: 5px;
+  font-size: .75em;
+}

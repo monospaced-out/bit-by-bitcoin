@@ -46,7 +46,7 @@ view model = div [ class "container" ]
             |> text
           ],
           p [] [
-            "Mining is simply the process of writing a block onto the blockchain. " ++
+            "Mining is simply the process of writing a block onto the blockchain. (The blockchain is the shared ledger of all Bitcoin transactions.) " ++
             "A block must contain certain information, including the previous block, the transactions it contains, and a special string called a \"nonce\". " ++
             "The nonce exists because of one more requirement: the block must create a one-way hash based on all of this info. " ++
             "The hash is required to start with a certain number of 0's (in our example, just one). " ++

@@ -112,6 +112,10 @@ h1 {
   text-align: left;
 }
 
+.invalid-transaction {
+  color: #F44336;
+}
+
 .transaction-form {
   flex-grow: 1;
   text-align: right;
@@ -181,6 +185,12 @@ h1 {
 .miner-output i {
   margin-top: 5px;
   font-size: 24px;
+}
+
+.miner-success {
+  /* color: #81C784; */
+  color: #fff;
+  background: #1B5E20;
 }
 
 .transaction i {

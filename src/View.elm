@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i)
-import Html.Attributes exposing (style, type_, value, class)
+import Html.Attributes exposing (type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash)
 import Settings exposing (confirmationsRequired, numMainAddresses)
@@ -178,7 +178,7 @@ htmlTransactionPool model =
   model.transactionPool
     |> reverse
     |> map ( \tx ->
-        div [ class "transaction", txStyle (longestChain model.discoveredBlocks) tx ] [
+        div [ txClass (longestChain model.discoveredBlocks) tx ] [
           i [ class "fas fa-exchange-alt" ] [],
           hashDisplay (txHash tx) ++ " | " |> text,
           i [ class "fas fa-address-card" ] [],
@@ -195,7 +195,7 @@ htmlMiners : Model -> Html Msg
 htmlMiners model =
   model.miners
     |> indexedMap ( \m miner ->
-        div [ minerStyle model m miner ] [
+        div [ minerClass model m miner ] [
           htmlMiner model m miner
         ]
       )
@@ -304,23 +304,23 @@ txDisplay tx =
 hashDisplay : String -> String
 hashDisplay hash = slice 0 7 hash
 
-minerStyle : Model -> Int -> Miner -> Attribute msg
-minerStyle model minerIndex miner =
+minerClass : Model -> Int -> Miner -> Attribute msg
+minerClass model minerIndex miner =
   let
     previousBlock = blockToMine model miner
     nextTransaction = nextTx (longestChain model.discoveredBlocks) model.transactionPool
   in
     case nextTransaction of
       Nothing ->
-        style []
+        class ""
       Just transaction ->
         if isValidHash (testBlockHash transaction previousBlock minerIndex model.randomValue)
-          then style [ ("backgroundColor", "green") , ("color", "white") ]
-          else style []
+          then class "miner-success"
+          else class ""
 
-txStyle : List BlockLink -> Transaction -> Attribute msg
-txStyle blockchain transaction =
+txClass : List BlockLink -> Transaction -> Attribute msg
+txClass blockchain transaction =
   if isValidTx blockchain transaction
-    then style []
+    then class "transaction"
   else
-    style [ ("backgroundColor", "red") , ("color", "white") ]
+    class "transaction invalid-transaction"

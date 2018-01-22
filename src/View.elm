@@ -1,6 +1,6 @@
 module View exposing (..)
 
-import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span)
+import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i)
 import Html.Attributes exposing (style, type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash)
@@ -207,7 +207,7 @@ htmlMiner model minerIndex miner =
                 div [ class "miner-input-label" ] [
                   "nonce:" |> text
                 ],
-                div [] [
+                div [ class "miner-input-value nonce" ] [
                   nonceFor minerIndex model.randomValue |> text
                 ]
               ],
@@ -215,7 +215,7 @@ htmlMiner model minerIndex miner =
                 div [ class "miner-input-label" ] [
                   "transaction:" |> text
                 ],
-                div [] [
+                div [ class "miner-input-value" ] [
                   txHash nextTransaction |> hashDisplay |> text
                 ]
               ],
@@ -223,18 +223,16 @@ htmlMiner model minerIndex miner =
                 div [ class "miner-input-label" ] [
                   "prev block:" |> text
                 ],
-                div [] [
+                div [ class "miner-input-value" ] [
                   blockLinkHash previousBlock |> hashDisplay |> text
                 ]
               ]
             ],
-            div [ class "miner-encryption" ] [
-              text "->"
-            ],
             div [ class "miner-output" ] [
               testBlockHash nextTransaction previousBlock minerIndex model.randomValue
                 |> hashDisplay
-                |> text
+                |> text,
+              i [ class "fas fa-calculator" ] []
             ]
           ],
           select [ onChange (\s -> SelectEraseBlock s minerIndex), value (blockLinkHash miner.blockToErase) ] (

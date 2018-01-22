@@ -138,3 +138,21 @@ h1 {
   margin-right: 5px;
   font-size: .75em;
 }
+
+.nonce {
+  color: white;
+}
+
+.miner-output {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  margin-left: 10px;
+  color: white;
+}
+
+.miner-output i {
+  margin-top: 5px;
+  font-size: 24px;
+  color: #aaa;
+}

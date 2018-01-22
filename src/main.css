@@ -26,7 +26,12 @@ h1 {
   margin: 7px 7px 2px 7px;
   display: inline-block;
   position: relative;
-  width: 50px;
+  width: 60px;
+  font-size: .9em;
+}
+
+.block i {
+  margin-right: 5px;
 }
 
 .block::before, .leaves-container.multiple-leaves::before {

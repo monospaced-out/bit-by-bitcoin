@@ -104,7 +104,10 @@ getBlockLink index blockLinks =
 htmlBlock : BlockLink -> Html msg
 htmlBlock blockLink =
   div [ class "block-container" ] [
-    div [ class "block" ] [ text (hashDisplay (blockLinkHash blockLink)) ]
+    div [ class "block" ] [
+      i [ class "fas fa-square" ] [],
+      text (hashDisplay (blockLinkHash blockLink))
+    ]
   ]
 
 htmlBlockChildren : List BlockLink -> List BlockLink -> Html msg

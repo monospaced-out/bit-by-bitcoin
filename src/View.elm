@@ -3,9 +3,9 @@ module View exposing (..)
 import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i)
 import Html.Attributes exposing (type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
-import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash)
+import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash, isBlockInChain)
 import Settings exposing (confirmationsRequired, numMainAddresses)
-import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length)
+import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length, drop)
 import String exposing (slice)
 import Array exposing (Array, fromList, toList, get)
 import Json.Decode as Json
@@ -26,7 +26,7 @@ view model = div [ class "container" ]
     ],
     div [ class  "center-pane" ] [
       div [ class "center-pane-content" ] [
-        blockChain model.discoveredBlocks
+        blockChain model model.discoveredBlocks
       ]
     ],
     div [ class "right-pane" ] [
@@ -46,8 +46,8 @@ view model = div [ class "container" ]
     ]
   ]
 
-blockChain : List BlockLink -> Html msg
-blockChain blockLinks =
+blockChain : Model -> List BlockLink -> Html msg
+blockChain model blockLinks =
   div [ class "tree" ] [
     let
       blocksInOrder = reverse blockLinks
@@ -56,19 +56,19 @@ blockChain blockLinks =
         Nothing ->
           span [] []
         Just nextBlock ->
-          div [ class "leaves-container" ] [ buildBlockTree blocksInOrder nextBlock ]
+          div [ class "leaves-container" ] [ buildBlockTree model blocksInOrder nextBlock ]
   ]
 
-buildBlockTree : List BlockLink -> BlockLink -> Html msg
-buildBlockTree allBlockLinks blockLink =
+buildBlockTree : Model -> List BlockLink -> BlockLink -> Html msg
+buildBlockTree model allBlockLinks blockLink =
   div [ class "node" ] (
     case blockLink of
       NoBlock ->
         [
           allBlockLinks
             |> childrenForOriginBlock
-            |> htmlBlockChildren allBlockLinks,
-          htmlBlock NoBlock
+            |> htmlBlockChildren model allBlockLinks,
+          htmlBlock model NoBlock
         ]
       BlockLink block ->
         [
@@ -76,8 +76,8 @@ buildBlockTree allBlockLinks blockLink =
             |> map (\blockLinkIndex ->
                 getBlockLink blockLinkIndex allBlockLinks
               )
-            |> htmlBlockChildren allBlockLinks,
-          htmlBlock (BlockLink block)
+            |> htmlBlockChildren model allBlockLinks,
+          htmlBlock model (BlockLink block)
         ]
   )
 
@@ -101,17 +101,32 @@ getBlockLink index blockLinks =
     Just blockLinkAtIndex ->
       blockLinkAtIndex
 
-htmlBlock : BlockLink -> Html msg
-htmlBlock blockLink =
+htmlBlock : Model -> BlockLink -> Html msg
+htmlBlock model blockLink =
   div [ class "block-container" ] [
-    div [ class "block" ] [
+    div [ blockClass model blockLink ] [
       i [ class "fas fa-square" ] [],
       text (hashDisplay (blockLinkHash blockLink))
     ]
   ]
 
-htmlBlockChildren : List BlockLink -> List BlockLink -> Html msg
-htmlBlockChildren allBlockLinks childrenBlockLinks =
+blockClass : Model -> BlockLink -> Attribute msg
+blockClass model blockLink =
+  let
+    blockchain = longestChain model.discoveredBlocks
+    isInBlockChain = isBlockInChain blockLink blockchain
+    isConfirmed = isBlockInChain blockLink (drop confirmationsRequired blockchain)
+  in
+    if isInBlockChain
+      then
+        if isConfirmed
+          then class "block block-confirmed"
+        else
+          class "block block-unconfirmed"
+    else class "block block-ignored"
+
+htmlBlockChildren : Model -> List BlockLink -> List BlockLink -> Html msg
+htmlBlockChildren model allBlockLinks childrenBlockLinks =
   let
     leavesContainerClass =
       if length childrenBlockLinks > 1
@@ -120,7 +135,7 @@ htmlBlockChildren allBlockLinks childrenBlockLinks =
   in
     div [ class leavesContainerClass ] (
       childrenBlockLinks
-        |> map (\childBlockLink -> buildBlockTree allBlockLinks childBlockLink )
+        |> map (\childBlockLink -> buildBlockTree model allBlockLinks childBlockLink )
     )
 
 htmlAddresses : Model -> Html Msg

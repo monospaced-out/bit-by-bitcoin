@@ -22,12 +22,26 @@ h1 {
 
 .block {
   padding: 5px;
-  border: 1px solid #aaa;
   margin: 7px 7px 2px 7px;
   display: inline-block;
   position: relative;
   width: 60px;
   font-size: .9em;
+}
+
+.block-confirmed {
+  border: 1px solid #66BB6A;
+  color: #66BB6A;
+}
+
+.block-unconfirmed {
+  border: 1px solid #ccc;
+  color: #ccc;
+}
+
+.block-ignored {
+  border: 1px solid #666;
+  color: #666;
 }
 
 .block i {

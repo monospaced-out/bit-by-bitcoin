@@ -246,3 +246,15 @@ distanceToBlock blocklinks target =
             1 -- not reached unless target is not in blocklinks
           Just remainingBlocks ->
             1 + distanceToBlock remainingBlocks target
+
+erasableBlocks : List BlockLink -> List BlockLink
+erasableBlocks blocks =
+  blocks
+    |> longestChain
+    |> filter ( \blocklink ->
+        case blocklink of
+          NoBlock ->
+            False
+          BlockLink block ->
+            True
+      )

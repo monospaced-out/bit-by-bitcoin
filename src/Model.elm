@@ -180,8 +180,9 @@ isValidTx blockchain transaction =
   let
     senderHasFunds = (balanceFor blockchain transaction.sender) >= transaction.amount
     senderIsNotReceiver = transaction.sender /= transaction.receiver
+    amountIsPositive = transaction.amount > 0
   in
-    senderHasFunds && senderIsNotReceiver
+    senderHasFunds && senderIsNotReceiver && amountIsPositive
 
 nextTx : List BlockLink -> List Transaction -> Maybe Transaction
 nextTx blockchain transactionPool =
@@ -273,12 +274,4 @@ blockToMine model miner =
 
 isValidHash : String -> Bool
 isValidHash hash =
-  let
-    firstTwo = slice 0 2 hash
-  in
-    firstTwo == "aa" ||
-    firstTwo == "bb" ||
-    firstTwo == "cc" ||
-    firstTwo == "dd" ||
-    firstTwo == "ee" ||
-    firstTwo == "ff"
+  slice 0 1 hash == "0"

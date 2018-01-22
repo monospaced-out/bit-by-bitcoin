@@ -124,29 +124,30 @@ htmlAddresses : Model -> Html Msg
 htmlAddresses model =
   take numMainAddresses model.addressBook
     |> concatMap ( \address ->
-      let
-        blockchain = longestChain model.discoveredBlocks
-        confirmedBalance = confirmedBalanceFor blockchain address
-        unconfirmedBalance = balanceFor blockchain address
-        confirmedBalanceString = hashDisplay address.hash ++ " " ++
-          toString confirmedBalance ++ " BTC"
-        unconfirmedBalanceString = " (unconfirmed: " ++ toString unconfirmedBalance ++
-          " BTC)"
-        displayString =
-          if unconfirmedBalance == confirmedBalance
-            then confirmedBalanceString
-          else
-            confirmedBalanceString ++ unconfirmedBalanceString
-      in
-        [
-          text displayString,
-          br [] []
-        ] )
-    |> div []
+        let
+          blockchain = longestChain model.discoveredBlocks
+          confirmedBalance = confirmedBalanceFor blockchain address
+          unconfirmedBalance = balanceFor blockchain address
+        in
+          [
+            i [ class "fas fa-address-card" ] [],
+            hashDisplay address.hash ++ " | " ++ toString confirmedBalance |> text,
+            i [ class "fab fa-bitcoin" ] [],
+            if unconfirmedBalance /= confirmedBalance
+              then span [] [
+                " (pending: " ++ toString unconfirmedBalance |> text,
+                i [ class "fab fa-bitcoin" ] [],
+                ")" |> text
+              ]
+            else text "",
+            br [] []
+          ]
+      )
+    |> div [ class "address" ]
 
 htmlTransactionForm : Model -> Html Msg
 htmlTransactionForm model =
-  form [ onSubmit PostTx ] [
+  form [ class "transaction-form", onSubmit PostTx ] [
     text("From: "),
     select [ onChange InputTxSender ] (
       take numMainAddresses model.addressBook

@@ -100,8 +100,17 @@ h1 {
 }
 
 .address-container {
-  flex-grow: 1;
   text-align: left;
+}
+
+.transaction-form {
+  flex-grow: 1;
+  text-align: right;
+  margin-right: 50px;
+}
+
+.transaction-form input, .transaction-form select {
+  width: 100px;
 }
 
 .miners {
@@ -111,8 +120,12 @@ h1 {
 }
 
 .miner {
-  margin: 10px 20px;
+  margin: 20px;
   text-align: left;
+}
+
+.miner select {
+  margin-top: 5px;
 }
 
 .miner-body {
@@ -158,4 +171,12 @@ h1 {
 
 .transaction i {
   margin: 0 5px;
+}
+
+.address i.fa-bitcoin {
+  margin-left: 5px;
+}
+
+.address i.fa-address-card {
+  margin-right: 5px;
 }

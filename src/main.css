@@ -95,6 +95,10 @@ h1 {
   width: 37.5%;
 }
 
+.right-pane-content {
+  padding: 20px 10px;
+}
+
 .flex-container {
   display: flex;
 }
@@ -106,7 +110,7 @@ h1 {
 .transaction-form {
   flex-grow: 1;
   text-align: right;
-  margin-right: 50px;
+  margin-right: 30px;
 }
 
 .transaction-form input, .transaction-form select {
@@ -144,12 +148,17 @@ h1 {
   border-bottom: 1px solid #aaa;
   display: flex;
   align-items: center;
+  padding: 2px 5px;
 }
 
 .miner-input-label {
   flex-grow: 1;
   margin-right: 5px;
   font-size: .75em;
+}
+
+.miner-input-value i {
+  margin-right: 5px;
 }
 
 .nonce {

@@ -223,14 +223,16 @@ htmlMiner model minerIndex miner =
                   "transaction:" |> text
                 ],
                 div [ class "miner-input-value" ] [
+                  i [ class "fas fa-exchange-alt" ] [],
                   txHash nextTransaction |> hashDisplay |> text
                 ]
               ],
               div [ class "miner-input-row" ] [
                 div [ class "miner-input-label" ] [
-                  "prev block:" |> text
+                  "previous block:" |> text
                 ],
                 div [ class "miner-input-value" ] [
+                  i [ class "fas fa-square" ] [],
                   blockLinkHash previousBlock |> hashDisplay |> text
                 ]
               ]

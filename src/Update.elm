@@ -1,6 +1,6 @@
 module Update exposing (..)
 
-import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain)
+import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain, blockToMine)
 import Random
 import List exposing (head, indexedMap, filter, drop, length, append, map)
 import String exposing (slice, toInt)
@@ -45,18 +45,13 @@ mine model =
             let
               results = model.miners
                 |> indexedMap ( \m miner ->
-                    let blockToMine =
-                      case miner.blockToErase of
-                        NoBlock -> longestChainBlock
-                        BlockLink blockToErase ->
-                          case (maliciousBlockToMine model.discoveredBlocks blockToErase) of
-                            NoBlock -> NoBlock
-                            BlockLink block -> BlockLink block
+                    let
+                      mineBlock = blockToMine model miner
                     in
                       (
                         (nonceFor m model.randomValue),
-                        (testBlockHash transaction blockToMine m model.randomValue),
-                        blockToMine
+                        (testBlockHash transaction mineBlock m model.randomValue),
+                        mineBlock
                       )
                   )
                 |> filter (\(nonce, hash, block) -> (slice 0 2 hash) == "00")

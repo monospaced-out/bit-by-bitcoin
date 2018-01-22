@@ -116,6 +116,8 @@ a, a:visited {
 
 .right-pane {
   width: 37.5%;
+  height: 100vh;
+  overflow: scroll;
 }
 
 .right-pane-content {

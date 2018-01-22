@@ -3,7 +3,7 @@ module View exposing (..)
 import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span)
 import Html.Attributes exposing (style, type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
-import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, nextTx, nonceFor, isValidTx)
+import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx)
 import Settings exposing (confirmationsRequired, numMainAddresses)
 import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length)
 import String exposing (slice)
@@ -29,7 +29,17 @@ view model = div [ class "container" ]
       ]
     ],
     div [ class "right-pane" ] [
-      div [ class "right-pane-content" ] []
+      div [ class "right-pane-content" ] [
+        h2 [] [ text "Addresses" ],
+        div [ class "flex-container" ] [
+          div [ class "address-container" ] [
+            htmlAddresses model
+          ],
+          htmlTransactionForm model
+        ],
+        h2 [] [ text "Transaction Pool" ],
+        htmlTransactionPool model
+      ]
     ]
   ]
 
@@ -196,6 +206,67 @@ htmlBlockChildren allBlockLinks childrenBlockLinks =
         |> map (\childBlockLink -> buildBlockTree allBlockLinks childBlockLink )
     )
 
+htmlAddresses : Model -> Html Msg
+htmlAddresses model =
+  take numMainAddresses model.addressBook
+    |> concatMap ( \address ->
+      let
+        blockchain = longestChain model.discoveredBlocks
+        confirmedBalance = confirmedBalanceFor blockchain address
+        unconfirmedBalance = balanceFor blockchain address
+        confirmedBalanceString = hashDisplay address.hash ++ " " ++
+          toString confirmedBalance ++ " BTC"
+        unconfirmedBalanceString = " (unconfirmed: " ++ toString unconfirmedBalance ++
+          " BTC)"
+        displayString =
+          if unconfirmedBalance == confirmedBalance
+            then confirmedBalanceString
+          else
+            confirmedBalanceString ++ unconfirmedBalanceString
+      in
+        [
+          text displayString,
+          br [] []
+        ] )
+    |> div []
+
+htmlTransactionForm : Model -> Html Msg
+htmlTransactionForm model =
+  form [ onSubmit PostTx ] [
+    text("From: "),
+    select [ onChange InputTxSender ] (
+      take numMainAddresses model.addressBook
+        |> map ( \address ->
+            option [ value address.hash ] [ text (hashDisplay address.hash) ]
+          )
+    ),
+    br [] [],
+    text("To: "),
+    select [ onChange InputTxReceiver ] (
+      take numMainAddresses model.addressBook
+        |> map ( \address ->
+            option [ value address.hash ] [ text (hashDisplay address.hash) ]
+          )
+    ),
+    br [] [],
+    text("Amount: "),
+    input [ onInput InputTxAmount, type_ "number", Html.Attributes.min "0" ] [],
+    br [] [],
+    input [ type_ "submit" ] []
+  ]
+
+htmlTransactionPool : Model -> Html Msg
+htmlTransactionPool model =
+  model.transactionPool
+    |> reverse
+    |> map ( \tx ->
+        div [ txStyle (longestChain model.discoveredBlocks) tx ] [
+          text (txDisplay tx),
+          br [] []
+        ]
+      )
+    |> div []
+
 minerDisplay : Miner -> String
 minerDisplay miner =
   case miner.blockToErase of
@@ -234,9 +305,11 @@ blockDisplay blocklink =
 
 txDisplay : Transaction -> String
 txDisplay tx =
-  hashDisplay (txHash tx) ++ " {from: " ++ hashDisplay tx.sender.hash ++
-    ", to: " ++ hashDisplay tx.receiver.hash ++ ", amount: " ++
-    toString tx.amount ++ "BTC}"
+  let
+    amount = toString tx.amount ++ "BTC"
+    motion = hashDisplay tx.sender.hash ++ " -> " ++ hashDisplay tx.receiver.hash
+  in
+    motion ++ " | " ++ amount
 
 hashDisplay : String -> String
 hashDisplay hash = slice 0 7 hash

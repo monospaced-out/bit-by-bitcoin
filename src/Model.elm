@@ -258,3 +258,15 @@ erasableBlocks blocks =
           BlockLink block ->
             True
       )
+
+blockToMine : Model -> Miner -> BlockLink
+blockToMine model miner =
+  case head (longestChain model.discoveredBlocks) of
+    Nothing -> NoBlock
+    Just longestChainBlock ->
+      case miner.blockToErase of
+        NoBlock -> longestChainBlock
+        BlockLink blockToErase ->
+          case (maliciousBlockToMine model.discoveredBlocks blockToErase) of
+            NoBlock -> NoBlock
+            BlockLink block -> BlockLink block

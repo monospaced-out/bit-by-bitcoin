@@ -143,6 +143,13 @@ withUpdatedBalances blockchain addresses =
     addresses
       |> map (\address -> { address | balance = balanceFor confirmedBlockchain address })
 
+confirmedBalanceFor : List BlockLink -> Address -> Int
+confirmedBalanceFor blockchain address =
+  let
+    confirmedBlockchain = drop confirmationsRequired blockchain
+  in
+    balanceFor confirmedBlockchain address
+
 balanceFor : List BlockLink -> Address -> Int
 balanceFor blockchain address =
   case head blockchain of
@@ -170,7 +177,11 @@ balanceFor blockchain address =
 
 isValidTx : List BlockLink -> Transaction -> Bool
 isValidTx blockchain transaction =
-  (balanceFor blockchain transaction.sender) >= transaction.amount
+  let
+    senderHasFunds = (balanceFor blockchain transaction.sender) >= transaction.amount
+    senderIsNotReceiver = transaction.sender /= transaction.receiver
+  in
+    senderHasFunds && senderIsNotReceiver
 
 nextTx : List BlockLink -> List Transaction -> Maybe Transaction
 nextTx blockchain transactionPool =
@@ -235,3 +246,39 @@ distanceToBlock blocklinks target =
             1 -- not reached unless target is not in blocklinks
           Just remainingBlocks ->
             1 + distanceToBlock remainingBlocks target
+
+erasableBlocks : List BlockLink -> List BlockLink
+erasableBlocks blocks =
+  blocks
+    |> longestChain
+    |> filter ( \blocklink ->
+        case blocklink of
+          NoBlock ->
+            False
+          BlockLink block ->
+            True
+      )
+
+blockToMine : Model -> Miner -> BlockLink
+blockToMine model miner =
+  case head (longestChain model.discoveredBlocks) of
+    Nothing -> NoBlock
+    Just longestChainBlock ->
+      case miner.blockToErase of
+        NoBlock -> longestChainBlock
+        BlockLink blockToErase ->
+          case (maliciousBlockToMine model.discoveredBlocks blockToErase) of
+            NoBlock -> NoBlock
+            BlockLink block -> BlockLink block
+
+isValidHash : String -> Bool
+isValidHash hash =
+  let
+    firstTwo = slice 0 2 hash
+  in
+    firstTwo == "aa" ||
+    firstTwo == "bb" ||
+    firstTwo == "cc" ||
+    firstTwo == "dd" ||
+    firstTwo == "ee" ||
+    firstTwo == "ff"

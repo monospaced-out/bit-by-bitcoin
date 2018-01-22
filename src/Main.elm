@@ -12,7 +12,7 @@ init : ( Model, Cmd Msg )
 init =
   (
     {
-      miners = range 0 19
+      miners = range 0 9
         |> map (\n -> newMiner NoBlock),
       discoveredBlocks = [ NoBlock ],
       transactionPool = range 0 3

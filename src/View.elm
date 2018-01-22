@@ -3,7 +3,7 @@ module View exposing (..)
 import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span)
 import Html.Attributes exposing (style, type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
-import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx)
+import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks)
 import Settings exposing (confirmationsRequired, numMainAddresses)
 import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length)
 import String exposing (slice)
@@ -38,7 +38,9 @@ view model = div [ class "container" ]
           htmlTransactionForm model
         ],
         h2 [] [ text "Transaction Pool" ],
-        htmlTransactionPool model
+        htmlTransactionPool model,
+        h2 [] [ text "Miners" ],
+        htmlMiners model
       ]
     ]
   ]
@@ -267,13 +269,34 @@ htmlTransactionPool model =
       )
     |> div []
 
+htmlMiners : Model -> Html Msg
+htmlMiners model =
+  model.miners
+    |> indexedMap ( \m miner ->
+        div [ minerStyle model m ] [
+          minerDisplay miner |> text,
+          minerActionDisplay model m |> text,
+          select [ onChange (\s -> SelectEraseBlock s m), value (blockLinkHash miner.blockToErase) ] (
+            model.discoveredBlocks
+              |> erasableBlocks
+              |> reverse
+              |> map ( \blocklink ->
+                  option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
+                )
+              |> append [ option [ value (blockLinkHash NoBlock) ] [ text "Block to erase" ] ]
+          ),
+          br [] []
+        ]
+      )
+    |> div []
+
 minerDisplay : Miner -> String
 minerDisplay miner =
   case miner.blockToErase of
     NoBlock ->
-      "just chillin"
+      "Honest"
     BlockLink block ->
-      "Trying to erase block: " ++ hashDisplay (blockHash block)
+      "Erasing block: " ++ hashDisplay (blockHash block)
 
 minerActionDisplay : Model -> Int -> String
 minerActionDisplay model minerIndex =
@@ -289,7 +312,7 @@ minerActionDisplay model minerIndex =
           Nothing ->
             "no previous"
           Just block ->
-            ". trying nonce " ++ nonceFor minerIndex model.randomValue ++ ": " ++
+            " | trying nonce " ++ nonceFor minerIndex model.randomValue ++ ": " ++
               hashDisplay (testBlockHash transaction block minerIndex model.randomValue)
 
 blockDisplay : BlockLink -> String

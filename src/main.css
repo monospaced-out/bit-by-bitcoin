@@ -94,3 +94,12 @@ h1 {
 .right-pane {
   width: 37.5%;
 }
+
+.flex-container {
+  display: flex;
+}
+
+.address-container {
+  flex-grow: 1;
+  text-align: left;
+}

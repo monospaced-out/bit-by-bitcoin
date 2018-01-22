@@ -273,4 +273,12 @@ blockToMine model miner =
 
 isValidHash : String -> Bool
 isValidHash hash =
-  slice 0 2 hash == "00"
+  let
+    firstTwo = slice 0 2 hash
+  in
+    firstTwo == "aa" ||
+    firstTwo == "bb" ||
+    firstTwo == "cc" ||
+    firstTwo == "dd" ||
+    firstTwo == "ee" ||
+    firstTwo == "ff"

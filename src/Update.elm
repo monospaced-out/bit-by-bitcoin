@@ -1,6 +1,6 @@
 module Update exposing (..)
 
-import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain, blockToMine)
+import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain, blockToMine, isValidHash)
 import Random
 import List exposing (head, indexedMap, filter, drop, length, append, map)
 import String exposing (slice, toInt)
@@ -54,7 +54,7 @@ mine model =
                         mineBlock
                       )
                   )
-                |> filter (\(nonce, hash, block) -> (slice 0 2 hash) == "00")
+                |> filter (\(nonce, hash, block) -> isValidHash hash)
               withoutMinedTx = model.transactionPool
                 |> filter (\tx -> txHash tx /= txHash transaction )
               withoutNextTxInvalid =

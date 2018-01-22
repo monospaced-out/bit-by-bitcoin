@@ -143,6 +143,13 @@ withUpdatedBalances blockchain addresses =
     addresses
       |> map (\address -> { address | balance = balanceFor confirmedBlockchain address })
 
+confirmedBalanceFor : List BlockLink -> Address -> Int
+confirmedBalanceFor blockchain address =
+  let
+    confirmedBlockchain = drop confirmationsRequired blockchain
+  in
+    balanceFor confirmedBlockchain address
+
 balanceFor : List BlockLink -> Address -> Int
 balanceFor blockchain address =
   case head blockchain of

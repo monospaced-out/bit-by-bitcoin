@@ -36,10 +36,10 @@ h1 {
 
 .block::before, .leaves-container.multiple-leaves::before {
   content: "";
-  top: -11px;
+  bottom: -13px;
   left: 50%;
   position: absolute;
-  height: 10px;
+  height: 12px;
   width: 1px;
   background: #aaa;
 }
@@ -53,14 +53,14 @@ h1 {
 }
 
 .leaves-container.multiple-leaves {
-  padding-top: 2px;
-  margin-top: 9px;
+  padding-bottom: 9px;
+  margin-bottom: 2px;
   position: relative;
 }
 
 .leaves-container.multiple-leaves::after {
   position: absolute;
-  top: -1px;
+  bottom: -1px;
   left: 0;
   width: 100%;
   height: 1px;

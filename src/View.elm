@@ -65,19 +65,19 @@ buildBlockTree allBlockLinks blockLink =
     case blockLink of
       NoBlock ->
         [
-          htmlBlock NoBlock,
           allBlockLinks
             |> childrenForOriginBlock
-            |> htmlBlockChildren allBlockLinks
+            |> htmlBlockChildren allBlockLinks,
+          htmlBlock NoBlock
         ]
       BlockLink block ->
         [
-          htmlBlock (BlockLink block),
           block.nextBlocks
             |> map (\blockLinkIndex ->
                 getBlockLink blockLinkIndex allBlockLinks
               )
-            |> htmlBlockChildren allBlockLinks
+            |> htmlBlockChildren allBlockLinks,
+          htmlBlock (BlockLink block)
         ]
   )
 
@@ -250,7 +250,6 @@ htmlMiner model minerIndex miner =
           select [ onChange (\s -> SelectEraseBlock s minerIndex), value (blockLinkHash miner.blockToErase) ] (
             model.discoveredBlocks
               |> erasableBlocks
-              |> reverse
               |> map ( \blocklink ->
                   option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
                 )

@@ -187,16 +187,6 @@ htmlMiners model =
     |> indexedMap ( \m miner ->
         div [ minerStyle model m ] [
           htmlMiner model m miner
-          -- select [ onChange (\s -> SelectEraseBlock s m), value (blockLinkHash miner.blockToErase) ] (
-          --   model.discoveredBlocks
-          --     |> erasableBlocks
-          --     |> reverse
-          --     |> map ( \blocklink ->
-          --         option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
-          --       )
-          --     |> append [ option [ value (blockLinkHash NoBlock) ] [ text "Block to erase" ] ]
-          -- ),
-          -- br [] []
         ]
       )
     |> div [ class "miners" ]
@@ -214,40 +204,51 @@ htmlMiner model minerIndex miner =
           Nothing -> "" |> text
           Just previousBlock ->
             div [ class "miner" ] [
-              div [ class "miner-input" ] [
-                div [ class "miner-input-row" ] [
-                  div [ class "miner-input-label" ] [
-                    "nonce:" |> text
+              div [ class "miner-body" ] [
+                div [ class "miner-input" ] [
+                  div [ class "miner-input-row" ] [
+                    div [ class "miner-input-label" ] [
+                      "nonce:" |> text
+                    ],
+                    div [] [
+                      nonceFor minerIndex model.randomValue |> text
+                    ]
                   ],
-                  div [] [
-                    nonceFor minerIndex model.randomValue |> text
+                  div [ class "miner-input-row" ] [
+                    div [ class "miner-input-label" ] [
+                      "transaction:" |> text
+                    ],
+                    div [] [
+                      txHash nextTransaction |> hashDisplay |> text
+                    ]
+                  ],
+                  div [ class "miner-input-row" ] [
+                    div [ class "miner-input-label" ] [
+                      "prev block:" |> text
+                    ],
+                    div [] [
+                      blockLinkHash previousBlock |> hashDisplay |> text
+                    ]
                   ]
                 ],
-                div [ class "miner-input-row" ] [
-                  div [ class "miner-input-label" ] [
-                    "transaction:" |> text
-                  ],
-                  div [] [
-                    txHash nextTransaction |> hashDisplay |> text
-                  ]
+                div [ class "miner-encryption" ] [
+                  text "->"
                 ],
-                div [ class "miner-input-row" ] [
-                  div [ class "miner-input-label" ] [
-                    "prev block:" |> text
-                  ],
-                  div [] [
-                    blockLinkHash previousBlock |> hashDisplay |> text
-                  ]
+                div [ class "miner-output" ] [
+                  testBlockHash nextTransaction previousBlock minerIndex model.randomValue
+                    |> hashDisplay
+                    |> text
                 ]
               ],
-              div [ class "miner-encryption" ] [
-                text "->"
-              ],
-              div [ class "miner-output" ] [
-                testBlockHash nextTransaction previousBlock minerIndex model.randomValue
-                  |> hashDisplay
-                  |> text
-              ]
+              select [ onChange (\s -> SelectEraseBlock s minerIndex), value (blockLinkHash miner.blockToErase) ] (
+                model.discoveredBlocks
+                  |> erasableBlocks
+                  |> reverse
+                  |> map ( \blocklink ->
+                      option [ value (blockLinkHash blocklink) ] [ text (hashDisplay (blockLinkHash blocklink)) ]
+                    )
+                  |> append [ option [ value (blockLinkHash NoBlock) ] [ text "Block to erase" ] ]
+              )
             ]
 
 minerDisplay : Miner -> String

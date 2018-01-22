@@ -3,7 +3,7 @@ module View exposing (..)
 import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span)
 import Html.Attributes exposing (style, type_, value, class)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
-import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine)
+import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash)
 import Settings exposing (confirmationsRequired, numMainAddresses)
 import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length)
 import String exposing (slice)
@@ -305,7 +305,7 @@ minerStyle model minerIndex miner =
       Nothing ->
         style []
       Just transaction ->
-        if (slice 0 2 (testBlockHash transaction previousBlock minerIndex model.randomValue)) == "00"
+        if isValidHash (testBlockHash transaction previousBlock minerIndex model.randomValue)
           then style [ ("backgroundColor", "green") , ("color", "white") ]
           else style []
 

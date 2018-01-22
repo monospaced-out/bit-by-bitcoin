@@ -177,7 +177,11 @@ balanceFor blockchain address =
 
 isValidTx : List BlockLink -> Transaction -> Bool
 isValidTx blockchain transaction =
-  (balanceFor blockchain transaction.sender) >= transaction.amount
+  let
+    senderHasFunds = (balanceFor blockchain transaction.sender) >= transaction.amount
+    senderIsNotReceiver = transaction.sender /= transaction.receiver
+  in
+    senderHasFunds && senderIsNotReceiver
 
 nextTx : List BlockLink -> List Transaction -> Maybe Transaction
 nextTx blockchain transactionPool =

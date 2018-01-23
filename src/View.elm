@@ -152,9 +152,68 @@ htmlBlock model blockLink =
   div [ class "block-container" ] [
     div [ blockClass model blockLink ] [
       i [ class "fas fa-square" ] [],
-      text (hashDisplay (blockLinkHash blockLink))
+      text (hashDisplay (blockLinkHash blockLink)),
+      htmlBlockDetail model blockLink
     ]
   ]
+
+htmlBlockDetail : Model -> BlockLink -> Html msg
+htmlBlockDetail model blockLink =
+  case blockLink of
+    NoBlock ->
+      div [ class "block-detail" ] [
+        "origin block" |> text
+      ]
+    BlockLink block ->
+      div [ class "block-detail" ] [
+        div [ class "miner-body" ] [
+          div [ class "miner-input" ] [
+            div [ class "miner-input-row" ] [
+              div [ class "miner-input-label" ] [
+                "nonce:" |> text
+              ],
+              div [ class "miner-input-value nonce" ] [
+                block.nonce |> text
+              ]
+            ],
+            div [ class "miner-input-row" ] [
+              div [ class "miner-input-label" ] [
+                "transaction:" |> text
+              ],
+              div [ class "miner-input-value" ] [
+                i [ class "fas fa-exchange-alt" ] [],
+                txHash block.transaction |> hashDisplay |> text
+              ]
+            ],
+            div [ class "miner-input-row" ] [
+              div [ class "miner-input-label" ] [
+                "previous block:" |> text
+              ],
+              div [ class "miner-input-value" ] [
+                i [ class "fas fa-square" ] [],
+                blockLinkHash block.previousBlock |> hashDisplay |> text
+              ]
+            ]
+          ],
+          div [ class "miner-output" ] [
+            blockLinkHash blockLink
+              |> hashDisplay
+              |> text,
+            i [ class "fas fa-calculator" ] []
+          ]
+        ],
+        div [ class "transaction" ] [
+          i [ class "fas fa-address-card" ] [],
+          hashDisplay block.transaction.sender.hash |> text,
+          i [ class "fas fa-arrow-right" ] [],
+          i [ class "fas fa-address-card" ] [],
+          hashDisplay block.transaction.receiver.hash|> text
+        ],
+        div [] [
+          toString block.transaction.amount |> text,
+          i [ class "fab fa-bitcoin" ] []
+        ]
+      ]
 
 blockClass : Model -> BlockLink -> Attribute msg
 blockClass model blockLink =

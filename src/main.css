@@ -17,7 +17,7 @@ a, a:visited {
 }
 
 .tree {
-  overflow: scroll;
+  overflow: visible;
 }
 
 .node {
@@ -31,6 +31,7 @@ a, a:visited {
   position: relative;
   width: 60px;
   font-size: .9em;
+  position: relative;
 }
 
 .block-confirmed {
@@ -39,8 +40,8 @@ a, a:visited {
 }
 
 .block-unconfirmed {
-  border: 1px solid #ccc;
-  color: #ccc;
+  border: 1px solid #2E7D32;
+  color: #2E7D32;
 }
 
 .block-ignored {
@@ -48,8 +49,46 @@ a, a:visited {
   color: #666;
 }
 
+.block:hover {
+  border: 1px solid #81D4FA;
+  color: #81D4FA;
+}
+
 .block i {
   margin-right: 5px;
+}
+
+.block-detail {
+  min-width: 100px;
+  display: none;
+  background: #222;
+  padding: 5px;
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  z-index: 2;
+  padding: 15px;
+  border: 1px solid #81D4FA;
+  color: #81D4FA;
+  box-shadow: 0 0 20px #000;
+}
+
+.block-detail .miner-input {
+  border-top: 1px solid #81D4FA;
+  border-left: 1px solid #81D4FA;
+  border-right: 1px solid #81D4FA;
+}
+
+.block-detail .miner-input-row {
+  border-bottom: 1px solid #81D4FA;
+}
+
+.block:hover > .block-detail {
+  display: block;
+}
+
+.block-detail .transaction {
+  margin-top: 15px;
 }
 
 .block::before, .leaves-container.multiple-leaves::before {
@@ -188,6 +227,7 @@ a, a:visited {
 
 .miner-input-value i {
   margin-right: 5px;
+  display: inline;
 }
 
 .nonce {

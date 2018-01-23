@@ -248,9 +248,18 @@ a, a:visited {
 }
 
 .miner-success {
-  /* color: #81C784; */
-  color: #fff;
-  background: #1B5E20;
+  color: #81C784;
+  border: 1px solid #81C784;
+}
+
+.miner-success .miner-input {
+  border-top: 1px solid #81C784;
+  border-left: 1px solid #81C784;
+  border-right: 1px solid #81C784;
+}
+
+.miner-success .miner-input-row {
+  border-bottom: 1px solid #81C784;
 }
 
 .transaction i {

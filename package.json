@@ -1,0 +1,25 @@
+{
+  "name": "bit-by-bitcoin",
+  "version": "1.0.0",
+  "description": "## Development",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tyleryasaka/bit-by-bitcoin.git"
+  },
+  "author": "Tyler Yasaka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tyleryasaka/bit-by-bitcoin/issues"
+  },
+  "homepage": "https://github.com/tyleryasaka/bit-by-bitcoin#readme",
+  "dependencies": {
+    "create-elm-app": "1.10.2"
+  }
+}

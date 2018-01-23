@@ -2,7 +2,7 @@
     "name": "Bit by Bitcoin",
     "repository": "https://github.com/tyleryasaka/bit-by-bitcoin",
     "env": {
-      "ELM_COMPILE": "./node_modules/create-elm-app/bin/elm-app-cli.js build"
+      "ELM_COMPILE": "elm-make src/Main.elm --output build/elm.js"
     },
     "buildpacks": [
         {

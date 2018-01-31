@@ -167,7 +167,7 @@ a, a:visited {
 .left-pane {
   width: 25%;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   background: #212121;
 }
 
@@ -185,7 +185,7 @@ a, a:visited {
   flex-shrink: 0;
   flex-basis: auto;
   height: 100%;
-  overflow: scroll;
+  overflow: auto;
   border-left: 1px solid #444;
   border-right: 1px solid #444;
   background: #212121;
@@ -199,7 +199,7 @@ a, a:visited {
 .right-pane {
   width: 37.5%;
   height: 100%;
-  overflow: scroll;
+  overflow: auto;
   background: #212121;
 }
 

@@ -6,7 +6,7 @@ import Update exposing (update)
 import View exposing (view)
 import Array exposing (fromList, get)
 import List exposing (map, range)
-import Html exposing (Html)
+import Html exposing (programWithFlags)
 import Ports exposing (provideNames)
 import Random
 
@@ -63,7 +63,7 @@ subscriptions model =
   provideNames ProvideNames
 
 main : Program Flags Model Msg
-main = Html.programWithFlags
+main = programWithFlags
   {
     view = view,
     init = init,

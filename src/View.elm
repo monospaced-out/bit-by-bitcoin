@@ -29,8 +29,8 @@ view model =
             "Note that this is a work in progress, and is an intentional oversimplification of the process. " ++
             "That said if you find any major flaws, please don't hesitate to "
             |> text,
-            a [ href "https://github.com/tyleryasaka/bit-by-bitcoin/pulls" ] [
-              "let me know" |> text
+            a [ href "https://github.com/monospaced-out/bit-by-bitcoin/issues/new" ] [
+              "let us know" |> text
             ],
             "!" |> text,
             p [] [
@@ -68,9 +68,9 @@ view model =
               |> text
             ],
             p [] [
-              a [ href "https://github.com/tyleryasaka/bit-by-bitcoin" ] [
+              a [ href "https://github.com/monospaced-out/bit-by-bitcoin" ] [
                 i [ class "fab fa-github" ] [],
-                "tyleryasaka/bit-by-bitcoin" |> text
+                "monospaced-out/bit-by-bitcoin" |> text
               ]
             ]
           ]

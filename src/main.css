@@ -14,6 +14,7 @@ h1 {
 
 h2 {
   color: #757575;
+  font-size: 16px;
 }
 
 a, a:visited {
@@ -212,7 +213,7 @@ a, a:visited {
 }
 
 .right-pane-content {
-  padding: 20px 10px 0 10px;
+  padding: 0px 10px;
 }
 
 .flex-container {
@@ -260,7 +261,7 @@ a, a:visited {
 }
 
 .miner {
-  margin: 20px;
+  margin: 19px;
   text-align: left;
 }
 
@@ -336,7 +337,7 @@ table {
 
 td {
   border: 1px solid;
-  padding: 4px;
+  padding: 2px 4px;
 }
 
 td > span {

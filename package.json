@@ -7,19 +7,19 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "elm-live src/Main.elm --output build/elm.js",
+    "start": "./node_modules/elm-live/bin/elm-live.js src/Main.elm --output build/elm.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tyleryasaka/bit-by-bitcoin.git"
+    "url": "git+https://github.com/monospaced-out/bit-by-bitcoin.git"
   },
-  "author": "Tyler Yasaka",
+  "author": "Tyler Yasaka, Patrick Lindsay",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tyleryasaka/bit-by-bitcoin/issues"
+    "url": "https://github.com/monospaced-out/bit-by-bitcoin/issues"
   },
-  "homepage": "https://github.com/tyleryasaka/bit-by-bitcoin#readme",
+  "homepage": "https://github.com/monospaced-out/bit-by-bitcoin#readme",
   "dependencies": {
     "create-elm-app": "1.10.2"
   },

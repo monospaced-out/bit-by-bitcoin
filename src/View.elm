@@ -3,9 +3,9 @@ module View exposing (..)
 import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i, p, a)
 import Html.Attributes exposing (type_, value, class, href)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
-import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash, isBlockInChain)
+import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash, isBlockInChain, minedBlocksFor)
 import Settings exposing (confirmationsRequired, numMainAddresses)
-import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length, drop)
+import List exposing (indexedMap, map, filter, append, concat, concatMap, take, head, reverse, length, drop, tail, isEmpty)
 import String exposing (slice)
 import Array exposing (Array, fromList, toList, get)
 import Json.Decode as Json
@@ -306,23 +306,43 @@ htmlTransactionForm model =
     input [ type_ "submit" ] []
   ]
 
+htmlTransaction : Transaction -> Model -> Html Msg
+htmlTransaction transaction model =
+  div [ txClass (longestChain model.discoveredBlocks) transaction ] [
+    i [ class "fas fa-exchange-alt" ] [],
+    hashDisplay (txHash transaction) ++ " | " |> text,
+    i [ class "fas fa-address-card" ] [],
+    hashDisplay transaction.sender.hash |> text,
+    i [ class "fas fa-arrow-right" ] [],
+    i [ class "fas fa-address-card" ] [],
+    hashDisplay transaction.receiver.hash ++ " | " ++ toString transaction.amount |> text,
+    i [ class "fab fa-bitcoin" ] []
+  ]
+
 htmlTransactionPool : Model -> Html Msg
 htmlTransactionPool model =
-  model.transactionPool
-    |> reverse
-    |> map ( \tx ->
-        div [ txClass (longestChain model.discoveredBlocks) tx ] [
-          i [ class "fas fa-exchange-alt" ] [],
-          hashDisplay (txHash tx) ++ " | " |> text,
-          i [ class "fas fa-address-card" ] [],
-          hashDisplay tx.sender.hash |> text,
-          i [ class "fas fa-arrow-right" ] [],
-          i [ class "fas fa-address-card" ] [],
-          hashDisplay tx.receiver.hash ++ " | " ++ toString tx.amount |> text,
-          i [ class "fab fa-bitcoin" ] []
-        ]
-      )
-    |> div []
+  div [] [
+    case tail model.transactionPool of
+      Nothing ->
+        div [] []
+      Just remainingTransactions ->
+        remainingTransactions
+        |> reverse
+        |> map ( \tx -> htmlTransaction tx model )
+        |> div [],
+        case head model.transactionPool of
+          Nothing ->
+            div [] []
+          Just oldestTransaction ->
+            let
+                minedBlocks = minedBlocksFor model oldestTransaction
+                transactionHasBeenMined = not(isEmpty minedBlocks)
+            in
+                if transactionHasBeenMined then
+                  div [ class "transaction-success" ] [ htmlTransaction oldestTransaction model ]
+                else
+                  div [] [ htmlTransaction oldestTransaction model ]
+    ]
 
 htmlMiners : Model -> Html Msg
 htmlMiners model =

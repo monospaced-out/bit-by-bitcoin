@@ -307,6 +307,10 @@ a, a:visited {
   border-bottom: 1px solid #81C784;
 }
 
+.transaction-success {
+  color: #81C784;
+}
+
 .transaction i {
   margin: 0 5px;
 }

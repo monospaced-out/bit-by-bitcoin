@@ -236,6 +236,10 @@ a, a:visited {
   justify-content: center;
 }
 
+.miners > div {
+  border: 1px solid #212121;
+}
+
 .miner {
   margin: 20px;
   text-align: left;
@@ -292,7 +296,7 @@ a, a:visited {
   font-size: 24px;
 }
 
-.miner-success {
+.miners > .miner-success {
   color: #81C784;
   border: 1px solid #81C784;
 }

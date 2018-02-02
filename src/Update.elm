@@ -1,11 +1,13 @@
 module Update exposing (..)
 
-import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain, blockToMine, isValidHash)
+import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent, GetNames, ProvideNames), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain, blockToMine, isValidHash, minedBlocksFor)
 import Random
+import Array exposing(fromList, get)
 import List exposing (head, indexedMap, filter, drop, length, append, map)
 import String exposing (slice, toInt)
 import Settings exposing (transactionPoolSize)
 import Result exposing (withDefault)
+import Ports exposing (getNames)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -13,7 +15,10 @@ update msg model =
     Next ->
       (
         model |> mine |> refillTransactionPool |> updateMiners,
-        Random.generate RandomEvent (Random.int 1 100000)
+        Cmd.batch [
+          Random.generate RandomEvent (Random.int 1 100000),
+          getNames (transactionPoolSize * 2)
+        ]
       )
     PostTx ->
       ( postTx model, Cmd.none )
@@ -27,6 +32,10 @@ update msg model =
       ( selectEraseBlock model value index, Cmd.none )
     RandomEvent randomValue ->
       ({ model | randomValue = randomValue }, Cmd.none)
+    GetNames numNames ->
+      (model, getNames numNames )
+    ProvideNames names ->
+      ({ model | randomNames = names }, Cmd.none)
 
 mine : Model -> Model
 mine model =
@@ -43,18 +52,7 @@ mine model =
             model
           Just longestChainBlock ->
             let
-              results = model.miners
-                |> indexedMap ( \m miner ->
-                    let
-                      mineBlock = blockToMine model miner
-                    in
-                      (
-                        (nonceFor m model.randomValue),
-                        (testBlockHash transaction mineBlock m model.randomValue),
-                        mineBlock
-                      )
-                  )
-                |> filter (\(nonce, hash, block) -> isValidHash hash)
+              results = minedBlocksFor model transaction
               withoutMinedTx = model.transactionPool
                 |> filter (\tx -> txHash tx /= txHash transaction )
               withoutNextTxInvalid =
@@ -90,21 +88,29 @@ mine model =
 refillTransactionPool : Model -> Model
 refillTransactionPool model =
   let
+    namesArray = fromList model.randomNames
+    firstNameInList = case get 0 namesArray of
+      Nothing -> "Sender"
+      Just name -> name
+    secondNameInList = case get 1 namesArray of
+      Nothing -> "Receiver"
+      Just name -> name
     newAddressBalance = 10
-    newTxSender = length model.addressBook
-    newTxReceiver = length model.addressBook + 1
+    newTxSenderSeed = length model.addressBook
+    newTxReceiverSeed = length model.addressBook + 1
     newTxAmount = 1
-    txToAdd = newTx newTxSender newTxReceiver newTxAmount
+    txToAdd = newTx (firstNameInList, newTxSenderSeed) (secondNameInList, newTxReceiverSeed) newTxAmount
     withNewTx = append model.transactionPool [ txToAdd ]
     withNewAddresses = (append model.addressBook [
-      (newAddress newTxSender newAddressBalance),
-      (newAddress newTxReceiver newAddressBalance)
+      (newAddress firstNameInList newTxSenderSeed newAddressBalance),
+      (newAddress secondNameInList newTxReceiverSeed newAddressBalance)
     ])
   in
     if length model.transactionPool < transactionPoolSize
       then refillTransactionPool { model |
         transactionPool = withNewTx,
-        addressBook = withNewAddresses
+        addressBook = withNewAddresses,
+        randomNames = drop 2 model.randomNames
       }
     else
       model

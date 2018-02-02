@@ -2,13 +2,26 @@ module Model exposing (..)
 
 import Sha256 exposing (sha256)
 import String exposing (slice)
-import List exposing (head, filter, drop, map, length, sortWith, foldr, tail)
+import List exposing (head, filter, drop, indexedMap, map, length, sortWith, foldr, tail)
 import Tuple exposing (first, second)
 import Array exposing (fromList, get)
 import Settings exposing (confirmationsRequired)
 import Sha256 exposing (sha256)
 
-type Msg = Next | PostTx | InputTxSender String | InputTxReceiver String | InputTxAmount String | SelectEraseBlock String Int  | RandomEvent Int
+type Msg
+  = Next
+  | PostTx
+  | InputTxSender String
+  | InputTxReceiver String
+  | InputTxAmount String
+  | SelectEraseBlock String Int
+  | RandomEvent Int
+  | GetNames Int
+  | ProvideNames (List String)
+
+type alias Flags = {
+  initialNames : List String
+}
 
 type alias Model = {
   miners : List Miner,
@@ -16,6 +29,7 @@ type alias Model = {
   transactionPool : List Transaction,
   addressBook : List Address,
   randomValue : Int,
+  randomNames : List String,
   txForm: TxForm
 }
 
@@ -38,6 +52,7 @@ type alias Transaction = {
 }
 
 type alias Address = {
+  name: String,
   hash : String,
   balance : Int
 }
@@ -67,14 +82,14 @@ blockLinkHash blocklink =
 newMiner : BlockLink -> Miner
 newMiner blocklink = { blockToErase = blocklink }
 
-newAddress : Int -> Int -> Address
-newAddress seed balance = { hash = sha256 (toString seed), balance = balance }
+newAddress : String -> Int -> Int -> Address
+newAddress name seed balance = { name = name, hash = sha256 (toString seed), balance = balance }
 
-newTx : Int -> Int -> Int -> Transaction
-newTx senderSeed receiverSeed amount =
+newTx : (String, Int) -> (String, Int) -> Int -> Transaction
+newTx (senderName, senderSeed) (receiverName, receiverSeed) amount =
   {
-    sender = newAddress senderSeed 10,
-    receiver = newAddress receiverSeed 10,
+    sender = newAddress senderName senderSeed 10,
+    receiver = newAddress receiverName receiverSeed 10,
     amount = amount
   }
 
@@ -97,7 +112,7 @@ findAddress hash addresses =
   in
     case head matches of
       Nothing ->
-        { hash = "", balance = 0 }
+        { name = "", hash = "", balance = 0 }
       Just address ->
         address
 
@@ -271,6 +286,20 @@ blockToMine model miner =
           case (maliciousBlockToMine model.discoveredBlocks blockToErase) of
             NoBlock -> NoBlock
             BlockLink block -> BlockLink block
+
+minedBlocksFor : Model -> Transaction -> List (String, String, BlockLink)
+minedBlocksFor model transaction = model.miners
+  |> indexedMap ( \m miner ->
+      let
+        parentBlock = blockToMine model miner
+      in
+        (
+          (nonceFor m model.randomValue),
+          (testBlockHash transaction parentBlock m model.randomValue),
+          parentBlock
+        )
+    )
+  |> filter (\(nonce, hash, block) -> isValidHash hash)
 
 isValidHash : String -> Bool
 isValidHash hash =

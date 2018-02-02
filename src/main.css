@@ -1,10 +1,9 @@
 body {
-  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   text-align: center;
   color: #aaa;
   background: #282828;
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'Roboto Mono', 'Source Sans Pro', monospace;
   font-size: 12px;
 }
 
@@ -154,9 +153,13 @@ a, a:visited {
 }
 
 .controls button {
+  border: 1px solid #81C784;
+  background: #212121;
+  color: #81C784;
+  font-family: 'Roboto Mono', 'Source Sans Pro', monospace;
   padding: 5px 10px;
   font-size: 15px;
-  border-radius: 2px;
+  border-radius: 1px;
 }
 
 .controls button i {
@@ -172,7 +175,12 @@ a, a:visited {
 }
 
 .left-pane-content {
-  padding: 20px 10px;
+  padding: 24px 10px;
+}
+.left-pane-content p {
+  font-size:16px;
+  line-height: 22px;
+  text-align: left;
 }
 
 .left-pane-content i {
@@ -209,6 +217,7 @@ a, a:visited {
 
 .flex-container {
   display: flex;
+  justify-content: center;
 }
 
 .address-container {
@@ -226,14 +235,28 @@ a, a:visited {
   margin-right: 30px;
 }
 
-.transaction-form input, .transaction-form select {
+.transaction-form input {
   width: 100px;
+}
+
+.transaction-form select,
+.transaction-form input[type="submit"] {
+  width: 107px;
+}
+
+.transaction-form input,
+.transaction-form select {
+  margin-bottom: 4px;
 }
 
 .miners {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.miners > div {
+  border: 1px solid #212121;
 }
 
 .miner {
@@ -292,7 +315,7 @@ a, a:visited {
   font-size: 24px;
 }
 
-.miner-success {
+.miners > .miner-success {
   color: #81C784;
   border: 1px solid #81C784;
 }
@@ -307,8 +330,43 @@ a, a:visited {
   border-bottom: 1px solid #81C784;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid;
+  padding: 4px;
+}
+
+td > span {
+  padding: 0 4px;
+}
+
+td .flex-container {
+  align-content: space-between;
+}
+
+td > .flex-container > div {
+  min-width: 100px;
+  text-align: left;
+}
+
+.transaction-success {
+  color: #81C784;
+}
+
 .transaction i {
+  align-self: center;
   margin: 0 5px;
+}
+
+.transaction > td > .flex-container > div:nth-child(3) {
+  text-align: right;
+}
+
+.transaction .fa-arrow-right {
+  margin: 0 15px;
 }
 
 .address i.fa-bitcoin {

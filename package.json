@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "elm-live src/Main.elm --output build/elm.js",
+    "start": "./node_modules/elm-live/bin/elm-live.js src/Main.elm --output build/elm.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

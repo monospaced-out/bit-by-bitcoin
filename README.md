@@ -6,8 +6,6 @@ Bit by Bitcoin is an interactive tool for understanding how Bitcoin and proof-of
 
 ## Development
 
-`$ npm install -g elm`
-
-`$ npm install -g elm-live`
+`$ npm install`
 
 `$ npm run start`

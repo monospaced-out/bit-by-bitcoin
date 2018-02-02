@@ -217,10 +217,10 @@ htmlBlockDetail model blockLink =
         ],
         div [ class "transaction" ] [
           i [ class "fas fa-address-card" ] [],
-          hashDisplay block.transaction.sender.hash |> text,
+          block.transaction.sender.name |> text,
           i [ class "fas fa-arrow-right" ] [],
           i [ class "fas fa-address-card" ] [],
-          hashDisplay block.transaction.receiver.hash|> text
+          block.transaction.receiver.name |> text
         ],
         div [] [
           toString block.transaction.amount |> text,
@@ -267,7 +267,7 @@ htmlAddresses model =
         in
           [
             i [ class "fas fa-address-card" ] [],
-            hashDisplay address.hash ++ " | " ++ toString confirmedBalance |> text,
+            address.name ++ " | " ++ toString confirmedBalance |> text,
             i [ class "fab fa-bitcoin" ] [],
             if unconfirmedBalance /= confirmedBalance
               then span [] [
@@ -312,10 +312,10 @@ htmlTransaction transaction model =
     i [ class "fas fa-exchange-alt" ] [],
     hashDisplay (txHash transaction) ++ " | " |> text,
     i [ class "fas fa-address-card" ] [],
-    hashDisplay transaction.sender.hash |> text,
+    transaction.sender.name |> text,
     i [ class "fas fa-arrow-right" ] [],
     i [ class "fas fa-address-card" ] [],
-    hashDisplay transaction.receiver.hash ++ " | " ++ toString transaction.amount |> text,
+    transaction.receiver.name ++ " | " ++ toString transaction.amount |> text,
     i [ class "fab fa-bitcoin" ] []
   ]
 
@@ -450,7 +450,7 @@ txDisplay : Transaction -> String
 txDisplay tx =
   let
     amount = toString tx.amount ++ "BTC"
-    motion = hashDisplay tx.sender.hash ++ " -> " ++ hashDisplay tx.receiver.hash
+    motion = hashDisplay tx.sender.name ++ " -> " ++ hashDisplay tx.receiver.name
   in
     motion ++ " | " ++ amount
 

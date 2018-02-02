@@ -19,7 +19,11 @@
 </head>
 <body>
   <script>
-    Elm.Main.fullscreen()
+    var app = Elm.Main.fullscreen()
+    app.ports.getNames.subscribe(function(count) {
+      names = ['Alex', 'Bob', 'Chuck', 'Daisy', 'Eddie', 'Francis', 'Greg'];
+      app.ports.provideNames.send(names);
+    });
   </script>
   <noscript>
       You need to enable JavaScript to run this app.

@@ -217,6 +217,7 @@ a, a:visited {
 
 .flex-container {
   display: flex;
+  justify-content: center;
 }
 
 .address-container {
@@ -329,12 +330,43 @@ a, a:visited {
   border-bottom: 1px solid #81C784;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid;
+  padding: 4px;
+}
+
+td > span {
+  padding: 0 4px;
+}
+
+td .flex-container {
+  align-content: space-between;
+}
+
+td > .flex-container > div {
+  min-width: 100px;
+  text-align: left;
+}
+
 .transaction-success {
   color: #81C784;
 }
 
 .transaction i {
+  align-self: center;
   margin: 0 5px;
+}
+
+.transaction > td > .flex-container > div:nth-child(3) {
+  text-align: right;
+}
+
+.transaction .fa-arrow-right {
+  margin: 0 15px;
 }
 
 .address i.fa-bitcoin {

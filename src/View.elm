@@ -1,6 +1,6 @@
 module View exposing (..)
 
-import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i, p, a)
+import Html exposing (Html, Attribute, button, text, div, h1, h2, h3, br, form, input, select, option, span, i, p, a, table, tr, td)
 import Html.Attributes exposing (type_, value, class, href)
 import Html.Events exposing (on, onClick, onSubmit, onInput)
 import Model exposing (Msg(Next, SelectEraseBlock, PostTx, InputTxSender, InputTxReceiver, InputTxAmount), Model, BlockLink(BlockLink, NoBlock), Miner, Transaction, Address, blockLinkHash, blockHash, testBlockHash, txHash, longestChain, withUpdatedBalances, balanceFor, confirmedBalanceFor, nextTx, nonceFor, isValidTx, erasableBlocks, blockToMine, isValidHash, isBlockInChain, minedBlocksFor)
@@ -91,7 +91,7 @@ view model =
             htmlTransactionForm model
           ],
           h2 [] [ text "Transaction Pool" ],
-          htmlTransactionPool model,
+          div [class "flex-container"] [htmlTransactionPool model],
           h2 [] [ text "Miners" ],
           htmlMiners model
         ]
@@ -259,27 +259,31 @@ htmlBlockChildren model allBlockLinks childrenBlockLinks =
 htmlAddresses : Model -> Html Msg
 htmlAddresses model =
   take numMainAddresses model.addressBook
-    |> concatMap ( \address ->
+    |> map ( \address ->
         let
           blockchain = longestChain model.discoveredBlocks
           confirmedBalance = confirmedBalanceFor blockchain address
           unconfirmedBalance = balanceFor blockchain address
         in
-          [
-            i [ class "fas fa-address-card" ] [],
-            address.name ++ " | " ++ toString confirmedBalance |> text,
-            i [ class "fab fa-bitcoin" ] [],
-            if unconfirmedBalance /= confirmedBalance
-              then span [] [
-                " (pending: " ++ toString unconfirmedBalance |> text,
-                i [ class "fab fa-bitcoin" ] [],
-                ")" |> text
-              ]
-            else text "",
-            br [] []
+          tr [] [
+            td [] [
+              i [ class "fas fa-address-card" ] [],
+              address.name |> text
+            ],
+            td [] [
+             toString confirmedBalance |> text,
+             i [ class "fab fa-bitcoin" ] [],
+             if unconfirmedBalance /= confirmedBalance
+             then span [] [
+               " (pending: " ++ toString unconfirmedBalance |> text,
+               i [ class "fab fa-bitcoin" ] [],
+               ")" |> text
+               ]
+             else text ""
+            ]
           ]
       )
-    |> div [ class "address" ]
+    |> table [ class "address" ]
 
 htmlTransactionForm : Model -> Html Msg
 htmlTransactionForm model =
@@ -306,43 +310,57 @@ htmlTransactionForm model =
     input [ type_ "submit" ] []
   ]
 
-htmlTransaction : Transaction -> Model -> Html Msg
-htmlTransaction transaction model =
-  div [ txClass (longestChain model.discoveredBlocks) transaction ] [
-    i [ class "fas fa-exchange-alt" ] [],
-    hashDisplay (txHash transaction) ++ " | " |> text,
-    i [ class "fas fa-address-card" ] [],
-    transaction.sender.name |> text,
-    i [ class "fas fa-arrow-right" ] [],
-    i [ class "fas fa-address-card" ] [],
-    transaction.receiver.name ++ " | " ++ toString transaction.amount |> text,
-    i [ class "fab fa-bitcoin" ] []
+htmlTransaction : Transaction -> String -> Html Msg
+htmlTransaction transaction classNames =
+  tr [ class classNames ] [
+    td [] [
+      i [ class "fas fa-exchange-alt" ] [],
+      span [] [hashDisplay (txHash transaction) |> text]
+    ],
+    td [] [
+      div [ class "flex-container" ] [
+        div [] [
+          i [ class "fas fa-address-card" ] [],
+          span [] [transaction.sender.name |> text]
+        ],
+        i [ class "fas fa-arrow-right" ] [],
+        div [ class "align-right" ] [
+          span [] [transaction.receiver.name |> text],
+          i [ class "fas fa-address-card" ] []
+        ]
+      ]
+    ],
+    td [] [
+      span [] [toString transaction.amount |> text],
+      i [ class "fab fa-bitcoin" ] []
+    ]
   ]
 
 htmlTransactionPool : Model -> Html Msg
 htmlTransactionPool model =
-  div [] [
+  [
     case tail model.transactionPool of
       Nothing ->
-        div [] []
+        []
       Just remainingTransactions ->
         remainingTransactions
         |> reverse
-        |> map ( \tx -> htmlTransaction tx model )
-        |> div [],
+        |> map ( \tx -> htmlTransaction tx (txClass (longestChain model.discoveredBlocks) tx) ),
         case head model.transactionPool of
           Nothing ->
-            div [] []
+            []
           Just oldestTransaction ->
             let
                 minedBlocks = minedBlocksFor model oldestTransaction
                 transactionHasBeenMined = not(isEmpty minedBlocks)
             in
                 if transactionHasBeenMined then
-                  div [ class "transaction-success" ] [ htmlTransaction oldestTransaction model ]
+                  [ htmlTransaction oldestTransaction "transaction transaction-success" ]
                 else
-                  div [] [ htmlTransaction oldestTransaction model ]
-    ]
+                  [ htmlTransaction oldestTransaction "transaction" ]
+  ]
+  |> concat
+  |> table [ class "transactions" ]
 
 htmlMiners : Model -> Html Msg
 htmlMiners model =
@@ -471,9 +489,9 @@ minerClass model minerIndex miner =
           then class "miner-success"
           else class ""
 
-txClass : List BlockLink -> Transaction -> Attribute msg
+txClass : List BlockLink -> Transaction -> String
 txClass blockchain transaction =
   if isValidTx blockchain transaction
-    then class "transaction"
+    then "transaction"
   else
-    class "transaction invalid-transaction"
+    "transaction invalid-transaction"

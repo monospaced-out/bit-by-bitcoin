@@ -1,6 +1,6 @@
 module Update exposing (..)
 
-import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain, blockToMine, isValidHash)
+import Model exposing (Msg(Next, PostTx, InputTxSender, InputTxReceiver, InputTxAmount, SelectEraseBlock, RandomEvent), Model, BlockLink(BlockLink, NoBlock), nextTx, longestChain, maliciousBlockToMine, nonceFor, testBlockHash, txHash, blockHash, blockLinkHash, isValidTx, newTx, newAddress, findAddress, isBlockInChain, blockToMine, isValidHash, minedBlocksFor)
 import Random
 import List exposing (head, indexedMap, filter, drop, length, append, map)
 import String exposing (slice, toInt)
@@ -43,18 +43,7 @@ mine model =
             model
           Just longestChainBlock ->
             let
-              results = model.miners
-                |> indexedMap ( \m miner ->
-                    let
-                      mineBlock = blockToMine model miner
-                    in
-                      (
-                        (nonceFor m model.randomValue),
-                        (testBlockHash transaction mineBlock m model.randomValue),
-                        mineBlock
-                      )
-                  )
-                |> filter (\(nonce, hash, block) -> isValidHash hash)
+              results = minedBlocksFor model transaction
               withoutMinedTx = model.transactionPool
                 |> filter (\tx -> txHash tx /= txHash transaction )
               withoutNextTxInvalid =

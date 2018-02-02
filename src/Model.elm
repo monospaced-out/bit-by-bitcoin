@@ -2,7 +2,7 @@ module Model exposing (..)
 
 import Sha256 exposing (sha256)
 import String exposing (slice)
-import List exposing (head, filter, drop, map, length, sortWith, foldr, tail)
+import List exposing (head, filter, drop, indexedMap, map, length, sortWith, foldr, tail)
 import Tuple exposing (first, second)
 import Array exposing (fromList, get)
 import Settings exposing (confirmationsRequired)
@@ -271,6 +271,20 @@ blockToMine model miner =
           case (maliciousBlockToMine model.discoveredBlocks blockToErase) of
             NoBlock -> NoBlock
             BlockLink block -> BlockLink block
+
+minedBlocksFor : Model -> Transaction -> List (String, String, BlockLink)
+minedBlocksFor model transaction = model.miners
+  |> indexedMap ( \m miner ->
+      let
+        mineBlock = blockToMine model miner
+      in
+        (
+          (nonceFor m model.randomValue),
+          (testBlockHash transaction mineBlock m model.randomValue),
+          mineBlock
+        )
+    )
+  |> filter (\(nonce, hash, block) -> isValidHash hash)
 
 isValidHash : String -> Bool
 isValidHash hash =

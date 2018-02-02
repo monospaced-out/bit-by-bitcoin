@@ -276,12 +276,12 @@ minedBlocksFor : Model -> Transaction -> List (String, String, BlockLink)
 minedBlocksFor model transaction = model.miners
   |> indexedMap ( \m miner ->
       let
-        mineBlock = blockToMine model miner
+        parentBlock = blockToMine model miner
       in
         (
           (nonceFor m model.randomValue),
-          (testBlockHash transaction mineBlock m model.randomValue),
-          mineBlock
+          (testBlockHash transaction parentBlock m model.randomValue),
+          parentBlock
         )
     )
   |> filter (\(nonce, hash, block) -> isValidHash hash)

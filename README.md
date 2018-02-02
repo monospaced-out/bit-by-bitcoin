@@ -8,6 +8,6 @@ Bit by Bitcoin is an interactive tool for understanding how Bitcoin and the Bloc
 
 `$ npm install -g elm`
 
-`$ npm install -g create-elm-app`
+`$ npm install -g elm-live`
 
-`$ elm-app start`
+`$ npm run start`

@@ -1,10 +1,9 @@
 body {
-  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   text-align: center;
   color: #aaa;
   background: #282828;
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'Roboto Mono', 'Source Sans Pro', monospace;
   font-size: 12px;
 }
 
@@ -154,9 +153,13 @@ a, a:visited {
 }
 
 .controls button {
+  border: 1px solid #81C784;
+  background: #212121;
+  color: #81C784;
+  font-family: 'Roboto Mono', 'Source Sans Pro', monospace;
   padding: 5px 10px;
   font-size: 15px;
-  border-radius: 2px;
+  border-radius: 1px;
 }
 
 .controls button i {
@@ -172,7 +175,12 @@ a, a:visited {
 }
 
 .left-pane-content {
-  padding: 20px 10px;
+  padding: 24px 10px;
+}
+.left-pane-content p {
+  font-size:16px;
+  line-height: 22px;
+  text-align: left;
 }
 
 .left-pane-content i {
@@ -226,8 +234,18 @@ a, a:visited {
   margin-right: 30px;
 }
 
-.transaction-form input, .transaction-form select {
+.transaction-form input {
   width: 100px;
+}
+
+.transaction-form select,
+.transaction-form input[type="submit"] {
+  width: 107px;
+}
+
+.transaction-form input,
+.transaction-form select {
+  margin-bottom: 4px;
 }
 
 .miners {

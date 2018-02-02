@@ -15,14 +15,24 @@
   <link href="https://use.fontawesome.com/releases/v5.0.4/css/all.css" rel="stylesheet">
   <link rel="stylesheet" href="src/main.css">
   <script type="text/javascript" src="build/elm.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.js"></script>
   <title>Elm App</title>
 </head>
 <body>
   <script>
-    var app = Elm.Main.fullscreen()
+    var getNames = function(count) {
+      var names = [];
+      for(i=0; i < count; i++) {
+        var name = faker.name.firstName();
+        names.push(name);
+      }
+      return names;
+    };
+
+    var app = Elm.Main.fullscreen({initialNames: getNames(13)});
+
     app.ports.getNames.subscribe(function(count) {
-      names = ['Alex', 'Bob', 'Chuck', 'Daisy', 'Eddie', 'Francis', 'Greg'];
-      app.ports.provideNames.send(names);
+      app.ports.provideNames.send(getNames(count));
     });
   </script>
   <noscript>

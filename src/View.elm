@@ -288,7 +288,7 @@ htmlTransactionForm model =
     select [ onChange InputTxSender ] (
       take numMainAddresses model.addressBook
         |> map ( \address ->
-            option [ value address.hash ] [ text (hashDisplay address.hash) ]
+            option [ value address.hash ] [ text (address.name) ]
           )
     ),
     br [] [],
@@ -296,7 +296,7 @@ htmlTransactionForm model =
     select [ onChange InputTxReceiver ] (
       take numMainAddresses model.addressBook
         |> map ( \address ->
-            option [ value address.hash ] [ text (hashDisplay address.hash) ]
+            option [ value address.hash ] [ text (address.name) ]
           )
     ),
     br [] [],

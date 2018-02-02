@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Settings exposing (numMainAddresses, lastMainAddressIndex, numMiners)
-import Model exposing (Model, Msg(ProvideNames, RandomEvent), BlockLink(NoBlock), newMiner, newTx, newAddress)
+import Model exposing (Model, Msg(ProvideNames, RandomEvent), BlockLink(NoBlock), Flags, newMiner, newTx, newAddress)
 import Update exposing (update)
 import View exposing (view)
 import Array exposing (fromList, get)
@@ -10,11 +10,11 @@ import Html exposing (Html)
 import Ports exposing (provideNames)
 import Random
 
-init : ( Model, Cmd Msg )
-init =
+init : Flags -> ( Model, Cmd Msg )
+init flags =
   (
     let
-      namesList = ["Alice", "Bob", "Cindy", "Drew", "Elaine", "Frank", "Grace", "Harry", "Irene", "Lamar", "Mary", "Nick", "Ophelia"]
+      namesList = flags.initialNames
       namesArray = fromList namesList
       firstNameInList = case get 0 namesArray of
         Nothing -> ""
@@ -62,8 +62,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   provideNames ProvideNames
 
-main : Program Never Model Msg
-main = Html.program
+main : Program Flags Model Msg
+main = Html.programWithFlags
   {
     view = view,
     init = init,

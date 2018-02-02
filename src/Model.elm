@@ -19,6 +19,10 @@ type Msg
   | GetNames Int
   | ProvideNames (List String)
 
+type alias Flags = {
+  initialNames : List String
+}
+
 type alias Model = {
   miners : List Miner,
   discoveredBlocks : List BlockLink,

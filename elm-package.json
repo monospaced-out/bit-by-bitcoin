@@ -1,7 +1,7 @@
 {
     "version": "0.0.1",
     "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/tyleryasaka/bit-by-bitcoin.git",
+    "repository": "https://github.com/monospaced-out/bit-by-bitcoin.git",
     "license": "BSD3",
     "source-directories": [
         "src"

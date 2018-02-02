@@ -2,7 +2,7 @@
 
 https://bit-by-bitcoin.herokuapp.com/
 
-Bit by Bitcoin is an interactive tool for understanding how Bitcoin and the Blockchain work. Note that this is a work in progress, and is an intentional oversimplification of the process. That said if you find any major flaws, please don't hesitate to let me know.
+Bit by Bitcoin is an interactive tool for understanding how Bitcoin and proof-of-work blockchains work. Note that this is a work in progress, and is an intentional oversimplification of the process. That said if you find any major flaws, please don't hesitate to let us know.
 
 ## Development
 

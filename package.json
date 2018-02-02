@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tyleryasaka/bit-by-bitcoin.git"
+    "url": "git+https://github.com/monospaced-out/bit-by-bitcoin.git"
   },
-  "author": "Tyler Yasaka",
+  "author": "Tyler Yasaka, Patrick Lindsay",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tyleryasaka/bit-by-bitcoin/issues"
+    "url": "https://github.com/monospaced-out/bit-by-bitcoin/issues"
   },
-  "homepage": "https://github.com/tyleryasaka/bit-by-bitcoin#readme",
+  "homepage": "https://github.com/monospaced-out/bit-by-bitcoin#readme",
   "dependencies": {
     "create-elm-app": "1.10.2"
   },
